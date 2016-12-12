@@ -26,7 +26,6 @@ int main() {
   //get Depth frame shared memory
   key_t keyDepth = getMemKey(true);
   int depthPayloadSize = kinect.depthFrame->width * kinect.depthFrame->height * kinect.rgbFrame->bytes_per_pixel + 1;
-  cout << "depth type: " << kinect.depthFrame->bytes_per_pixel << endl;
   void* sharedDepthMem = setupMem(true, keyDepth, depthPayloadSize);
   unsigned char* depthPayload;
 
