@@ -1,4 +1,6 @@
 29837423
 23938294
+89239843
 //first is rgb mem key
 //second is depth mem key
+//third is ir mem key

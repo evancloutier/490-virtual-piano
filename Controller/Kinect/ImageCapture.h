@@ -5,8 +5,25 @@
 #include <stdlib.h>
 #include <iostream>
 #include <string>
+#include <cstring>
 
 using namespace std;
+
+struct bgrx {
+  unsigned char b;
+  unsigned char g;
+  unsigned char r;
+  unsigned char x;
+};
+
+struct bgr {
+  unsigned char b;
+  unsigned char g;
+  unsigned char r;
+  bgr& operator=(bgrx& other) {
+    memcpy(&b, &other, 3);
+  }
+};
 
 class Kinect {
   public:
@@ -18,12 +35,14 @@ class Kinect {
     string serial;
     libfreenect2::Frame *rgbFrame;
     libfreenect2::Frame *depthFrame;
+    libfreenect2::Frame *irFrame;
 
   public:
     bool openKinect();
-    bool configureKinect(bool enableRGB, bool enableDepth);
-    bool startKinect(bool enableRGB, bool enableDepth);
+    bool configureKinect(bool enableRGB, bool enableDepth, bool enableIr);
+    bool startKinect(bool enableRGB, bool enableDepth, bool enableIr);
     bool getKinectFrames();
     bool stopKinect();
     bool releaseFrames();
+    void getFramesInfo();
 };

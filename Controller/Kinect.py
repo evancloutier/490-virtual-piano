@@ -37,8 +37,8 @@ class Kinect:
     def getImage(self, sharedMem):
         imgBuff = self.readMem(sharedMem)
         imgArray = numpy.asarray(bytearray(imgBuff), dtype=numpy.uint8)
-        print imgArray.size
-        opencvImage = cv2.imdecode(imgArray, cv2.CV_LOAD_IMAGE_UNCHANGED)
+        print imgArray[10:100]
+        opencvImage = cv2.imdecode(imgArray, 0)
         print "got here!"
         cv2.imwrite('animage.png', opencvImage)
 

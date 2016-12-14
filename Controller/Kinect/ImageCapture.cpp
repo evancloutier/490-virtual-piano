@@ -2,26 +2,17 @@
 
 using namespace std;
 
-/*int main() {
-  bool enableRGB = true;
-  bool enableDepth = true;
-  Kinect kinect;
-  kinect.openKinect();
-  kinect.configureKinect(enableRGB, enableDepth);
-  kinect.startKinect(enableRGB, enableDepth);
-  //for(int i = 0; i < 2; i++) {
-    kinect.getKinectFrames();
+void Kinect::getFramesInfo() {
+  cout << "frames coming from kinect:" << endl;
+  cout << "rgb: height - " << rgbFrame->height << " width - " <<
+  rgbFrame->width << " bytes per pixel - " << rgbFrame->bytes_per_pixel << endl;
 
-    //unsigned char blue = kinect.rgbFrame->data[1];
-    cout << endl << endl <<  "width: " << kinect.rgbFrame->width << " height: " << kinect.rgbFrame->height << " format: " << kinect.rgbFrame->format << " bytes per pixel: " << kinect.rgbFrame->bytes_per_pixel << endl << endl << endl;
-    //cout << endl << endl << kinect.rgbFrame->data << endl << endl;
-    kinect.releaseFrames();
-  //}
+  cout << "depth: height - " << depthFrame->height << " width - " <<
+  depthFrame->width << " bytes per pixel - " << depthFrame->bytes_per_pixel << endl;
 
-  kinect.stopKinect();
-  cout << endl << endl << "program done!" << endl << endl;
-  return 0;
-}*/
+  cout << "IR: height - " << irFrame->height << " width - " <<
+  irFrame->width << " bytes per pixel - " << irFrame->bytes_per_pixel << endl;
+}
 
 bool Kinect::releaseFrames() {
   listener->release(*frames);
@@ -35,10 +26,11 @@ bool Kinect::getKinectFrames() {
   listener->waitForNewFrame(*frames);
   rgbFrame = frames->at(libfreenect2::Frame::Color);
   depthFrame = frames->at(libfreenect2::Frame::Depth);
+  irFrame = frames->at(libfreenect2::Frame::Ir);
   return true;
 }
 
-bool Kinect::startKinect(bool enableRGB, bool enableDepth) {
+bool Kinect::startKinect(bool enableRGB, bool enableDepth, bool enableIr) {
   if(enableRGB && enableDepth) {
 
     if(!dev->start()) {
@@ -55,7 +47,7 @@ bool Kinect::startKinect(bool enableRGB, bool enableDepth) {
 
 }
 
-bool Kinect::configureKinect(bool enableRGB, bool enableDepth) {
+bool Kinect::configureKinect(bool enableRGB, bool enableDepth, bool enableIr) {
   int types = 0;
   if(enableRGB) {
     types = types | libfreenect2::Frame::Color;

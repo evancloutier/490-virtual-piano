@@ -12,6 +12,6 @@ INCLUDE_DIRECTORIES(
 )
 
 
-add_executable(main ImageCapture.cpp ./SharedMemWrite.cpp)
+add_executable(main ImageCapture.cpp SharedMemWrite.cpp ./main.cpp)
 
 target_link_libraries(main ${freenect2_LIBRARIES})
