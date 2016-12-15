@@ -18,7 +18,6 @@
 
 using namespace std;
 
-
 class ImageWrite {
 
   public:
@@ -40,6 +39,7 @@ class ImageWrite {
     };
 
     Kinect kinect;
+
 
     int rgbWidth = 1920;
     int rgbHeight = 1080;

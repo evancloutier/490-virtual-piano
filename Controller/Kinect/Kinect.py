@@ -1,4 +1,5 @@
 import sys
+from PIL import Image
 sys.path.append('/usr/local/lib/python2.7/site-packages')
 import sysv_ipc
 import struct
@@ -6,9 +7,11 @@ import cv2
 import numpy
 
 
-sharedMemKeyLoc = "Kinect/memkey.txt"
+sharedMemKeyLoc = "memkey.txt"
 rgbIdx = 0
 depthIdx = 1
+width = 512
+height = 424
 
 class Kinect:
     def __init__(self):
@@ -36,12 +39,17 @@ class Kinect:
 
     def getImage(self, sharedMem):
         imgBuff = self.readMem(sharedMem)
-        imgArray = numpy.asarray(bytearray(imgBuff), dtype=numpy.uint8)
-        print imgArray[10:100]
-        opencvImage = cv2.imdecode(imgArray, 0)
-        print "got here!"
-        cv2.imwrite('animage.png', opencvImage)
+        pilImage = Image.frombytes("RGB", (width, height), imgBuff)
+        pilImage.save("/home/evan/rgb.png", "PNG")
+        cv2Image = numpy.array(pilImage)
+        return cv2Image
+
+    def invertImage(self, cv2Im):
+        revIm = (255 - cv2Im)
+        cv2.imwrite("/home/evan/reverse.png", revIm)
 
 
 kinect = Kinect()
-kinect.getImage(kinect.rgbSharedMem)
+cv2Im = kinect.getImage(kinect.rgbSharedMem)
+#trivial image inversion
+kinect.invertImage(cv2Im)

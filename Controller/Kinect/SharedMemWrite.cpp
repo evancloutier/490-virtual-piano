@@ -14,8 +14,6 @@ ImageWrite::ImageWrite() {
   kinect.startKinect(enableRGB, enableDepth, enableIR);
   kinect.getKinectFrames();
 
-  kinect.getFramesInfo();
-
   rgbMem = getMemory(ImageWrite::RGB);
   depthMem = getMemory(ImageWrite::Depth);
   irMem = getMemory(ImageWrite::IR);
@@ -23,9 +21,11 @@ ImageWrite::ImageWrite() {
   kinect.releaseFrames();
 }
 
+
 unsigned char* ImageWrite::scaleDownImage(bgrx* originalPayload) {
   //original image is 1920 * 1080
   //scaled down new image is 512 * 424
+
   bgr* newPayload = (bgr*)malloc(depthWidth * depthHeight * sizeof(bgr));
 
   int baseIdx;
@@ -33,7 +33,6 @@ unsigned char* ImageWrite::scaleDownImage(bgrx* originalPayload) {
   float width = 0;
   for(int newIdx = 0; newIdx < depthWidth * depthHeight; newIdx += 1) {
     baseIdx = round(width) + rgbWidth * round(height);
-    cout << "height: " << round(height) << " width: " << round(width) << " base idx: " << baseIdx << endl;
     newPayload[newIdx] = originalPayload[baseIdx];
 
     width += ((float)rgbWidth/depthWidth);
@@ -41,6 +40,7 @@ unsigned char* ImageWrite::scaleDownImage(bgrx* originalPayload) {
       width = 0;
       height += ((float)rgbHeight/depthHeight);
     }
+
   }
 
   return (unsigned char*)newPayload;
@@ -58,6 +58,7 @@ void ImageWrite::getFramesAndWriteToBuff(bool enableRGB, bool enableDepth, bool 
     writeToMem(rgbMem, rgbPayload, rgbMemSize);
     writeToMem(depthMem, depthPayload, depthMemSize);
     writeToMem(irMem, irPayload, irMemSize);
+
 
     while(1){};
     kinect.releaseFrames();
@@ -81,7 +82,7 @@ void* ImageWrite::getMemory(int imageType) {
 
   if(imageType == ImageWrite::RGB) {
     frame = kinect.rgbFrame;
-    //downscale frame
+    //downscale frame dimensions
     bufferSize = depthWidth * depthHeight * rgbBytesPerPixel;
     rgbMemSize = bufferSize;
   }
@@ -114,8 +115,9 @@ void* ImageWrite::createMem(int imageType, key_t key, int payloadSize) {
   void *shared_memory;
   int* shmid;
 
-  if(imageType == ImageWrite::RGB)
+  if(imageType == ImageWrite::RGB) {
     shmid = &rgbShmid;
+  }
   else if(imageType == ImageWrite::Depth)
     shmid = &depthShmid;
   else if(imageType == ImageWrite::IR)

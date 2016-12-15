@@ -3,7 +3,9 @@ project("My Project")
 
 set(CMAKE_CXX_FLAGS "-std=c++11")
 
+
 find_package(freenect2 REQUIRED)
+
 
 include_directories("/usr/include/libusb-1.0/")
 
