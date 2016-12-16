@@ -18,9 +18,19 @@ ImageWrite::ImageWrite() {
   depthMem = getMemory(ImageWrite::Depth);
   irMem = getMemory(ImageWrite::IR);
 
+  semaphore = createSemaphore();
+
   kinect.releaseFrames();
 }
 
+void* ImageWrite::createSemaphore() {
+  key_t key = getSemKey();
+  cout << "Sem key: " << key << endl;
+
+  void* mem = createMem(ImageWrite::Semaphore, key, ImageWrite::BuffSize);
+
+  return mem;
+}
 
 unsigned char* ImageWrite::scaleDownImage(bgrx* originalPayload) {
   //original image is 1920 * 1080
@@ -48,22 +58,38 @@ unsigned char* ImageWrite::scaleDownImage(bgrx* originalPayload) {
 
 void ImageWrite::getFramesAndWriteToBuff(bool enableRGB, bool enableDepth, bool enableIr) {
   //get frames from kinect
+  int writing = ImageWrite::Writing;
+  int reading = ImageWrite::Reading;
+
   //for(int i = 0; i < 2; i++) {
-    kinect.getKinectFrames();
+
+  memcpy(semaphore, &writing, ImageWrite::BuffSize);
+
+  while(true) {
+
+    //get semaphore
+    while(*(int*)semaphore == ImageWrite::Reading) {
+      kinect.getKinectFrames();
+
+    }
 
     unsigned char* rgbPayload = (unsigned char*)kinect.rgbFrame->data;
     rgbPayload = scaleDownImage((bgrx*)rgbPayload);
-    unsigned char* depthPayload = (unsigned char*)kinect.depthFrame->data;
-    unsigned char* irPayload = (unsigned char*)kinect.irFrame->data;
+    //unsigned char* depthPayload = (unsigned char*)kinect.depthFrame->data;
+    //unsigned char* irPayload = (unsigned char*)kinect.irFrame->data;
+
+    //copy values to shared mem
     writeToMem(rgbMem, rgbPayload, rgbMemSize);
-    writeToMem(depthMem, depthPayload, depthMemSize);
-    writeToMem(irMem, irPayload, irMemSize);
+    //writeToMem(depthMem, depthPayload, depthMemSize);
+    //writeToMem(irMem, irPayload, irMemSize);
 
+    //release semaphore
+    memcpy(semaphore, &reading, ImageWrite::BuffSize);
 
-    while(1){};
-    kinect.releaseFrames();
     free(rgbPayload);
-  //}
+
+  }
+
 }
 
 void ImageWrite::endSession() {
@@ -122,6 +148,8 @@ void* ImageWrite::createMem(int imageType, key_t key, int payloadSize) {
     shmid = &depthShmid;
   else if(imageType == ImageWrite::IR)
     shmid = &irShmid;
+  else if(imageType == ImageWrite::Semaphore)
+    shmid = &semId;
 
   if ((*shmid = shmget(key, payloadSize, IPC_CREAT | 0666)) < 0)
   {
@@ -144,5 +172,12 @@ int ImageWrite::getMemKey(int imageType) {
   int key;
   for(int i = 0; i < n; i++)
     infile >> key;
+  return key;
+}
+
+int ImageWrite::getSemKey() {
+  ifstream infile("../semkey.txt");
+  int key;
+  infile >> key;
   return key;
 }

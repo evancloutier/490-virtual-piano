@@ -8,13 +8,20 @@ import numpy
 
 
 sharedMemKeyLoc = "memkey.txt"
+semaphoreKeyLoc = "semkey.txt"
 rgbIdx = 0
 depthIdx = 1
 width = 512
 height = 424
 
+semReading = 1
+semWriting = 0
+
 class Kinect:
     def __init__(self):
+        self.semaphoreKey = self.getSemaphoreKey()
+        self.semaphore = self.getSharedMemByKey(self.semaphoreKey)
+
         self.rgbKey, self.depthKey = self.getSharedMemKeys()
         self.rgbSharedMem = self.getSharedMemByKey(self.rgbKey)
 
@@ -29,6 +36,11 @@ class Kinect:
                 depthKey = int(line)
         return [rgbKey, depthKey]
 
+    def getSemaphoreKey(self):
+        semFile = open(semaphoreKeyLoc)
+        semKey = int(semFile.readlines()[0])
+        return semKey
+
     def getSharedMemByKey(self, key):
         mem = sysv_ipc.SharedMemory(key)
         return mem
@@ -37,8 +49,21 @@ class Kinect:
         memVal = sharedMem.read()
         return memVal
 
+    def getSemaphore(self):
+        while True:
+            semVal = bytearray(self.readMem(self.semaphore))[0]
+            if semVal == semReading:
+                return
+
+    def releaseSemaphore(self):
+        self.semaphore.write(chr(semWriting))
+
+
     def getImage(self, sharedMem):
+        self.getSemaphore()
         imgBuff = self.readMem(sharedMem)
+        self.releaseSemaphore()
+        
         pilImage = Image.frombytes("RGB", (width, height), imgBuff)
         pilImage.save("/home/evan/rgb.png", "PNG")
         cv2Image = numpy.array(pilImage)
@@ -50,6 +75,7 @@ class Kinect:
 
 
 kinect = Kinect()
-cv2Im = kinect.getImage(kinect.rgbSharedMem)
+while True:
+    cv2Im = kinect.getImage(kinect.rgbSharedMem)
 #trivial image inversion
-kinect.invertImage(cv2Im)
+#kinect.invertImage(cv2Im)

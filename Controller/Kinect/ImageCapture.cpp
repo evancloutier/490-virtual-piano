@@ -23,6 +23,7 @@ bool Kinect::stopKinect() {
 }
 
 bool Kinect::getKinectFrames() {
+  releaseFrames();
   listener->waitForNewFrame(*frames);
   rgbFrame = frames->at(libfreenect2::Frame::Color);
   depthFrame = frames->at(libfreenect2::Frame::Depth);
