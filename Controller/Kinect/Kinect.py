@@ -63,19 +63,24 @@ class Kinect:
         self.getSemaphore()
         imgBuff = self.readMem(sharedMem)
         self.releaseSemaphore()
-        
+
         pilImage = Image.frombytes("RGB", (width, height), imgBuff)
-        pilImage.save("/home/evan/rgb.png", "PNG")
+        #pilImage.save("/home/evan/rgb.png", "PNG")
         cv2Image = numpy.array(pilImage)
         return cv2Image
 
     def invertImage(self, cv2Im):
         revIm = (255 - cv2Im)
-        cv2.imwrite("/home/evan/reverse.png", revIm)
+        return revIm
 
 
 kinect = Kinect()
 while True:
     cv2Im = kinect.getImage(kinect.rgbSharedMem)
+    invert = kinect.invertImage(cv2Im)
+    cv2.imshow('input', invert)
+    k = cv2.waitKey(10)
+    if k == 27:
+        break
 #trivial image inversion
 #kinect.invertImage(cv2Im)
