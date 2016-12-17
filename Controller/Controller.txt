@@ -1,1 +1,3 @@
 Controller
+
+tutorial for Haar classifier
