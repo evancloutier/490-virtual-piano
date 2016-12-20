@@ -1,3 +1,4 @@
 Controller
 
 tutorial for Haar classifier
+http://note.sonots.com/SciSoftware/haartraining.html
