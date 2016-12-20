@@ -89,7 +89,6 @@ contours = None
 
 while True:
     blur = cv2.medianBlur(img, blurPixelSize)
-    canny = cv2.Canny(blur, 0, 10)
     contours, contourHeirarchy = cv2.findContours(blur, cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE)
 
     maxlen = 0
