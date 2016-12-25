@@ -1,10 +1,20 @@
 import cv2
+import cv2.cv as cv
 import time
 import numpy as np
+import os, sys
+import pdb
 
 width = 512
 height = 424
 
+def drawFingerCoords(img, fingerCoords):
+    if fingerCoords is None:
+        return
+    for fingerCoord in fingerCoords:
+        if type(fingerCoord) is not tuple:
+            fingerCoord = tuple(fingerCoord)
+        cv2.circle(img, fingerCoord, 5, (255, 0, 255), thickness=5)
 
 def averageDefects(defect1, defect2, contour):
 
@@ -20,7 +30,7 @@ def averageDefects(defect1, defect2, contour):
     return (newX, newY)
 
 
-def getFingerPoints(longestDefects, contour):
+def getFingerPointsFromDefect(longestDefects, contour):
     largestIdx = len(longestDefects) - 1
     fingerPoints = []
 
@@ -40,6 +50,35 @@ def getFingerPoints(longestDefects, contour):
             fingerPoints.append(midPoint)
 
     return fingerPoints
+
+def drawAngleAndBottomLine(img, dirUp, bottomline):
+    start = (0, bottomline)
+    end = (width, bottomline)
+    cv2.line(img, start, end, (0,255,255), thickness=3)
+
+
+def getFingerPointsFromHull(hull, isUp, centerOfHand):
+
+    #one per finger
+    k = 5
+    filteredCenters = None
+    centers = None
+    kmeansHull = []
+    for elem in hull:
+        if isUp:
+            if elem[0][1] <= centerOfHand[1]:
+                kmeansHull.append([np.float32(elem[0][0]), np.float32(elem[0][1])])
+        elif isUp is False:
+            if elem[0][1] >= centerOfHand[0]:
+                kmeansHull.append([np.float32(elem[0][0]), np.float32(elem[0][1])])
+    kmeansHull = np.asarray(kmeansHull)
+    if len(kmeansHull) >= k:
+        #get the k means
+        maxIters = 100
+        criteria = (cv2.TERM_CRITERIA_EPS, 10, 0.1)
+        retval, bestLabels, centers = cv2.kmeans(kmeansHull, k, criteria, maxIters, cv2.KMEANS_PP_CENTERS)
+
+    return centers
 
 
 def getLongestNDefectsinDirection(defects, n, clockwise=True):
@@ -64,31 +103,62 @@ def getLongestNDefectsinDirection(defects, n, clockwise=True):
     return largestDefects
 
 
-def getFingerConvexDefects(img, defects, contour):
+def getFingerConvexDefects(img, defects, contour, center, dirUp):
 
     defects = getLongestNDefectsinDirection(defects, 4)
-
+    filteredDefects = []
     for defect in defects:
         s, e, f, d = defect[0]
         start = tuple(contour[s][0])
         farthest = tuple(contour[f][0])
         end = tuple(contour[e][0])
-        cv2.line(img, start, farthest, (0,255,0), thickness=5)
-        cv2.line(img, farthest, end, (0,255,0), thickness=5)
+
+        if dirUp:
+            if start[1] < center[1] and farthest[1] < center[1] and end[1] < center[1]:
+                filteredDefects.append(defect)
+                cv2.line(img, start, farthest, (0,255,0), thickness=5)
+                cv2.line(img, farthest, end, (0,255,0), thickness=5)
+        elif dirUp is False:
+            if start[1] < center[1] and farthest[1] < center[1] and end[1] < center[1]:
+                filteredDefects.append(defect)
+                cv2.line(img, start, farthest, (0,255,0), thickness=5)
+                cv2.line(img, farthest, end, (0,255,0), thickness=5)
 
     return defects
+
+def drawHull(img, hull):
+    for idx in range(len(hull) - 1):
+        cv2.line(img, tuple(hull[idx][0]), tuple(hull[idx + 1][0]), (0,255,255), thickness=10)
+    cv2.line(img, tuple(hull[0][0]), tuple(hull[-1][0]), (0, 255, 255), thickness= 10)
+
+def buildBottomFilter(diff, isUp, bottomline):
+    if isUp:
+        for idx in range(bottomline, len(diff)):
+            row = diff[idx]
+            for elemIdx in range(len(row)):
+                row[elemIdx] = 0
+
+    elif isUp is False:
+        for idx in range(len(diff) - 1, bottomline, -1):
+            row = diff[idx]
+            for elemIdx in range(len(row)):
+                row[elemIdx] = 0
+
+    return diff
+
 
 cap = cv2.VideoCapture(0)
 code, background = cap.read()
 
-while(cap.isOpened()):
-    ret, img = cap.read()
-    hsv = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)
+fgbg = cv2.BackgroundSubtractorMOG2()
 
-    cv2.imshow('blank background', hsv)
-    background = hsv
-    k = cv2.waitKey(10)
-    if k == 27:
+
+while True:
+    ret, frame = cap.read()
+    fgmask = fgbg.apply(frame, learningRate=0.1)
+    cv2.imshow('Foreground', fgmask)
+    cv2.imshow('Original', frame)
+    if cv2.waitKey(10) == 27:
         break
 
 threshVal = 75
@@ -97,24 +167,30 @@ threshVal = 75
 blackImg = np.zeros((424,512,3), np.uint8)
 blackImgCopy = blackImg.copy()
 blurPixelSize = 17
+dirUp = True
+bottomline = 300
+bottomFilter = blackImgCopy.copy()
 
 contours = None
 
+frameIdx = 0
+
 while True:
     ret, img = cap.read()
-    hsv = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)
+    diff = fgbg.apply(img)
 
-    diff = cv2.absdiff(img, background)
-    diff = cv2.cvtColor(diff, cv2.COLOR_RGB2GRAY)
+    diff = buildBottomFilter(diff, dirUp, bottomline)
 
-    ret, thresh1 = cv2.threshold(diff, threshVal, 255, cv2.THRESH_BINARY)
+    blackImgCopy = blackImg.copy()
+    drawAngleAndBottomLine(blackImgCopy, dirUp, bottomline)
+
+    blur = cv2.medianBlur(diff, blurPixelSize)
+
+    ret, thresh1 = cv2.threshold(blur, threshVal, 255, cv2.THRESH_BINARY)
 
 
 
-    blur = cv2.medianBlur(thresh1, blurPixelSize)
-    contours, contourHeirarchy = cv2.findContours(blur, cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE)
-
-
+    contours, contourHeirarchy = cv2.findContours(thresh1, cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE)
 
     maxlen = 0
     largCont = []
@@ -123,22 +199,43 @@ while True:
             maxlen = len(cont)
             largCont = cont
 
-    blackImgCopy = blackImg.copy()
-    if len(largCont) != 0:
+
+    if len(largCont) > 0:
+        cv2.drawContours(blackImgCopy, largCont, -1, (255,255,255), thickness=5)
         cv2.fillPoly(blackImgCopy, pts=[largCont], color=(255,255,255))
 
+        hullForDefects = cv2.convexHull(largCont, returnPoints=False)
+        hull = cv2.convexHull(largCont)
+        drawHull(blackImgCopy, hull)
+        centerOfHand = cv2.moments(largCont, binaryImage=1)
+        if centerOfHand['m00'] != 0:
+            centerX = int(centerOfHand['m10']/centerOfHand['m00'])
+            centerY = int(centerOfHand['m01']/centerOfHand['m00'])
+            centerY += centerY*0.15
+            cv2.circle(blackImgCopy, (centerX, int(centerY)), 5, (255, 255, 0), thickness=5)
+            fingerPoints = getFingerPointsFromHull(hull, dirUp, (centerX, centerY))
+            drawFingerCoords(blackImgCopy, fingerPoints)
 
-    hullForDefects = cv2.convexHull(largCont, returnPoints=False)
-    hull = cv2.convexHull(largCont)
-    defects = cv2.convexityDefects(largCont, hullForDefects)
-    defects = getFingerConvexDefects(blackImgCopy, defects, largCont)
-    fingerCoords = getFingerPoints(defects, largCont)
-    for fingerCoord in fingerCoords:
-        cv2.circle(blackImgCopy, fingerCoord, 5, (255, 0, 255), thickness=5)
+            if len(hull) > 3:
+                pdb.set_trace()
+                defects = cv2.convexityDefects(largCont, hullForDefects)
+                if defects is not None and len(defects) > 0:
+                    defects = getFingerConvexDefects(blackImgCopy, defects, largCont, (centerX, centerY), dirUp)
+                    #fingerCoords = getFingerPointsFromDefect(defects, largCont)
+                    #for fingerCoord in fingerCoords:
+                        #cv2.circle(blackImgCopy, fingerCoord, 5, (255, 0, 255), thickness=5)
+                    #    pass
+                    #cv2.imshow('image', blackImgCopy)
+                else:
+                    pass
+        else:
+            pass
+    else:
+        cv2.drawContours(blackImgCopy, largCont, -1, (255, 255, 255))
 
 
+    cv2.imshow('transformed image', blur)
 
-    cv2.imshow('soruce image', blackImgCopy)
     k = cv2.waitKey(10)
     if k == 27:
         break
@@ -150,7 +247,3 @@ while True:
         threshVal += 5
     elif k == ord('s') and threshVal > 6:
         threshVal -= 5
-
-
-
-
