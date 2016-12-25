@@ -2,12 +2,13 @@ import cv2
 import cv2.cv as cv
 import time
 import numpy as np
+import math
 import os, sys
 import pdb
 
 width = 512
 height = 424
-blackImg = blackImg = np.zeros((424,512,3), np.uint8)
+blackImg = np.zeros((424,512,3), np.uint8)
 
 class FingerDetector:
     def __init__(self, bottomLine, blurPixelSize, threshVal, dirUp=True):
@@ -51,7 +52,7 @@ class FingerDetector:
             self.drawShape(blackImgCopy, hand)
 
             hullWithPoints, hullWithoutPoints = self.getConvexHull(hand)
-            ##self.drawConvexHull(blackImgCopy, hullWithoutPoints)
+            self.drawConvexHull(blackImgCopy, hullWithoutPoints)
 
             centerOfHand = self.getCenterOfHand(hand)
             #self.drawCenterOfHand(blackImgCopy, centerOfHand)
@@ -68,6 +69,8 @@ class FingerDetector:
 
             if fingerPoints is not None and thumbPoint is not None:
                 fingerPoints.append(thumbPoint)
+
+            fingerPoints = self.checkForOverlappingPoints(fingerPoints)
 
             self.drawFingerPoints(blackImgCopy, fingerPoints)
 
@@ -149,6 +152,25 @@ class FingerDetector:
             defects = cv2.convexityDefects(contour, hull)
         return defects
 
+    def checkForOverlappingPoints(self, points):
+        if points is None:
+            return None
+
+        minDist = 20
+        hasChanged = True
+
+        while hasChanged:
+            hasChanged = False
+            for idx1 in range(len(points)):
+                for idx2 in range(len(points)):
+                    if idx1 != idx2 and hasChanged is False:
+                        dist = math.sqrt( math.pow(points[idx1][0] - points[idx2][0], 2) + math.pow(points[idx1][1] - points[idx2][1], 2))
+                        if dist <= minDist:
+                            del points[idx1]
+                            hasChanged = True
+
+        return points
+
 
     '''hand geometry functions'''
     def getCenterOfHand(self, contour):
@@ -158,7 +180,7 @@ class FingerDetector:
             if handMoments['m00'] != 0:
                 centerX = int(handMoments['m10']/handMoments['m00'])
                 centerY = int(handMoments['m01']/handMoments['m00'])
-                centerY -= centerY*0.3
+                centerY -= centerY*0.27
                 centerOfHand = (centerX, int(centerY))
         return centerOfHand
 
@@ -177,7 +199,9 @@ class FingerDetector:
                 elif dirUp is False:
                     if elem[0][1] >= centerOfHand[0]:
                         kmeansHull.append([np.float32(elem[0][0]), np.float32(elem[0][1])])
+
             kmeansHull = np.asarray(kmeansHull)
+
             if len(kmeansHull) >= k:
                 maxIters = 100
                 criteria = (cv2.TERM_CRITERIA_EPS, 10, 0.1)
@@ -203,11 +227,6 @@ class FingerDetector:
             if start[1] < center[1] and farthest[1] < center[1] and end[1] < center[1]:
                 filteredDefects.append(defect)
 
-        print
-        print filteredDefects
-        print
-        return filteredDefects
-
 
     def getLongestDefects(self, defects, n, clockwise=True):
         largestDefects = []
@@ -229,6 +248,7 @@ class FingerDetector:
             largestDefects.append(defects[idx])
 
         return largestDefects
+
 
     def getThumbPoint(self, contour, defects, centerOfHand, rightHand=True):
         if defects is None or contour is None or centerOfHand is None:
@@ -256,6 +276,7 @@ class FingerDetector:
         s, e, f, d = longestDefect[0]
         thumbPoint = contour[s][0]
         return thumbPoint.tolist()
+
 
     '''drawing functions'''
     def drawShape(self, frame, contour):
@@ -302,6 +323,6 @@ class FingerDetector:
 
 
 
-fingerDetector = FingerDetector(300, 17, 75)
+fingerDetector = FingerDetector(300, 9, 75)
 fingerDetector.continuousFingers()
 
