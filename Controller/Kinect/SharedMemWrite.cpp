@@ -61,8 +61,6 @@ void ImageWrite::getFramesAndWriteToBuff(bool enableRGB, bool enableDepth, bool 
   int writing = ImageWrite::Writing;
   int reading = ImageWrite::Reading;
 
-  //for(int i = 0; i < 2; i++) {
-
   memcpy(semaphore, &writing, ImageWrite::BuffSize);
 
   while(true) {

@@ -6,20 +6,34 @@ import math
 import os, sys
 import pdb
 
+
 width = 512
 height = 424
 blackImg = np.zeros((424,512,3), np.uint8)
 
 class FingerDetector:
-    def __init__(self, bottomLine, blurPixelSize, threshVal, bothHands=True):
+    def __init__(self, bottomLine, blurPixelSize, threshVal, bothHands=True, kinect=None):
         self.vidSrc = cv2.VideoCapture(0)
         self.background = cv2.BackgroundSubtractorMOG2()
-        self.buildBackgroundModel()
+        self.buildBackgroundModel(kinect)
         self.blurPixelSize = blurPixelSize
         self.bothHands = bothHands
         self.bottomLine = bottomLine
         self.threshVal = threshVal
 
+    def adjustParams(self, k):
+        if k == ord('q') and self.blurPixelSize < 30:
+            self.blurPixelSize += 2
+            print "blur size += 2 ", self.blurPixelSize
+        elif k == ord('w') and self.blurPixelSize > 2:
+            self.blurPixelSize -= 2
+            print "blur size -= 2 ", self.blurPixelSize
+        elif k == ord('a') and self.threshVal < 251:
+            self.threshVal += 5
+            print "threshold += 5 ", self.threshVal
+        elif k == ord('s') and self.threshVal > 6:
+            self.threshVal -= 5
+            print "threshold -= 5 ", self.threshVal
 
     def continuousFingers(self):
         while True:
@@ -28,23 +42,14 @@ class FingerDetector:
             k = cv2.waitKey(10)
             if k == 27:
                 break
-            elif k == ord('q') and self.blurPixelSize < 30:
-                self.blurPixelSize += 2
-                print "blur size += 2 ", self.blurPixelSize
-            elif k == ord('w') and self.blurPixelSize > 2:
-                self.blurPixelSize -= 2
-                print "blur size -= 2 ", self.blurPixelSize
-            elif k == ord('a') and self.threshVal < 251:
-                self.threshVal += 5
-                print "threshold += 5 ", self.threshVal
-            elif k == ord('s') and self.threshVal > 6:
-                self.threshVal -= 5
-                print "threshold -= 5 ", self.threshVal
+            else:
+                self.adjustParams(k)
             cv2.imshow('a', fingerImage)
 
-    def getFingerPositions(self):
-        ret, frame = self.vidSrc.read()
-        frame = self.getFrame()
+    def getFingerPositions(self, frame=None):
+        if frame is None:
+            frame = self.getFrame()
+
         diff = self.background.apply(frame)
         diff = self.filterBottom(diff, self.bottomLine)
         blackImgCopy = self.getBackgroundCopy()
@@ -105,10 +110,14 @@ class FingerDetector:
         return frame
 
 
-    def buildBackgroundModel(self):
+    def buildBackgroundModel(self, kinect=None):
         print "Hit esc to exit background mode"
         while True:
-                frame = self.getFrame()
+                frame = None
+                if kinect is None:
+                    frame = self.getFrame()
+                else:
+                    frame = kinect.getFrame(kinect.rgbSharedMem)
                 fgmask = self.background.apply(frame, learningRate=0.1)
                 cv2.imshow('Foreground', fgmask)
                 cv2.imshow('Original', frame)
@@ -368,6 +377,5 @@ class FingerDetector:
 
 
 
-fingerDetector = FingerDetector(300, 27, 159, False)
-fingerDetector.continuousFingers()
-
+#fingerDetector = FingerDetector(300, 27, 159, False)
+#fingerDetector.continuousFingers()

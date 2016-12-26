@@ -7,8 +7,8 @@ import cv2
 import numpy
 
 
-sharedMemKeyLoc = "memkey.txt"
-semaphoreKeyLoc = "semkey.txt"
+sharedMemKeyLoc = "Kinect/memkey.txt"
+semaphoreKeyLoc = "Kinect/semkey.txt"
 rgbIdx = 0
 depthIdx = 1
 width = 512
@@ -63,9 +63,9 @@ class Kinect:
         self.getSemaphore()
         imgBuff = self.readMem(sharedMem)
         self.releaseSemaphore()
-        
+
         pilImage = Image.frombytes("RGB", (width, height), imgBuff)
-        pilImage.save("/home/evan/rgb.png", "PNG")
+        #pilImage.save("/home/evan/rgb.png", "PNG")
         cv2Image = numpy.array(pilImage)
         return cv2Image
 
@@ -74,8 +74,8 @@ class Kinect:
         cv2.imwrite("/home/evan/reverse.png", revIm)
 
 
-kinect = Kinect()
-while True:
-    cv2Im = kinect.getFrame(kinect.rgbSharedMem)
+#kinect = Kinect()
+#while True:
+#    cv2Im = kinect.getFrame(kinect.rgbSharedMem)
 #trivial image inversion
 #kinect.invertImage(cv2Im)
