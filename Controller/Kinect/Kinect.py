@@ -59,7 +59,7 @@ class Kinect:
         self.semaphore.write(chr(semWriting))
 
 
-    def getImage(self, sharedMem):
+    def getFrame(self, sharedMem):
         self.getSemaphore()
         imgBuff = self.readMem(sharedMem)
         self.releaseSemaphore()
@@ -76,6 +76,6 @@ class Kinect:
 
 kinect = Kinect()
 while True:
-    cv2Im = kinect.getImage(kinect.rgbSharedMem)
+    cv2Im = kinect.getFrame(kinect.rgbSharedMem)
 #trivial image inversion
 #kinect.invertImage(cv2Im)
