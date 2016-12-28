@@ -6,13 +6,13 @@ import FingerDetector as FD
 class Main:
     def __init__(self):
         self.kinect = Kinect.Kinect()
-        self.fd = FD.FingerDetector(300, 27, 159, False, self.kinect)
+        self.fd = FD.FingerDetector(250, 27, 159, False, self.kinect)
 
 
     def controlLoop(self):
         while True:
             frame = self.kinect.getFrame(self.kinect.rgbSharedMem)
-            fingerPoints, fingerImage = self.fd.getFingerPositions()
+            fingerPoints, fingerImage = self.fd.getFingerPositions(frame)
             k = cv2.waitKey(10)
 
             if k == 27:

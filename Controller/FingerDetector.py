@@ -66,7 +66,7 @@ class FingerDetector:
 
 
         hand = leftHand
-        isLeftHand = True
+        isLeftHand = False
         fingerPoints = []
 
         for i in range(numHands):
@@ -99,7 +99,7 @@ class FingerDetector:
 
             #second iteration
             hand = rightHand
-            isLeftHand = False
+            isLeftHand = True
 
         return (fingerPoints, blackImgCopy)
 
@@ -209,7 +209,7 @@ class FingerDetector:
             if handMoments['m00'] != 0:
                 centerX = int(handMoments['m10']/handMoments['m00'])
                 centerY = int(handMoments['m01']/handMoments['m00'])
-                centerY -= centerY*0.30
+                centerY -= centerY*0.25
                 centerOfHand = (centerX, int(centerY))
         return centerOfHand
 
