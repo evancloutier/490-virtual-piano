@@ -9,10 +9,12 @@ import numpy
 
 sharedMemKeyLoc = "Kinect/memkey.txt"
 semaphoreKeyLoc = "Kinect/semkey.txt"
+#sharedMemKeyLoc = "memkey.txt"
+#semaphoreKeyLoc = "semkey.txt"
 rgbIdx = 0
 depthIdx = 1
-width = 512
-height = 424
+width = 1920
+height = 1080
 
 semReading = 1
 semWriting = 0
@@ -77,5 +79,9 @@ class Kinect:
 #kinect = Kinect()
 #while True:
 #    cv2Im = kinect.getFrame(kinect.rgbSharedMem)
+#    cv2.imshow("test", cv2Im)
+#    k = cv2.waitKey(10)
+#    if k == 27:
+#        break
 #trivial image inversion
 #kinect.invertImage(cv2Im)

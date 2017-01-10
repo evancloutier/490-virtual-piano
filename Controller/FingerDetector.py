@@ -7,9 +7,9 @@ import os, sys
 import pdb
 
 
-width = 512
-height = 424
-blackImg = np.zeros((424,512,3), np.uint8)
+width = 1920
+height = 1080
+blackImg = np.zeros((height,width,3), np.uint8)
 
 class FingerDetector:
     def __init__(self, bottomLine, blurPixelSize, threshVal, bothHands=True, kinect=None):
@@ -46,6 +46,7 @@ class FingerDetector:
                 self.adjustParams(k)
             cv2.imshow('a', fingerImage)
 
+
     def getFingerPositions(self, frame=None):
         if frame is None:
             frame = self.getFrame()
@@ -69,38 +70,41 @@ class FingerDetector:
         isLeftHand = False
         fingerPoints = []
 
-        for i in range(numHands):
+        if hand is not None:
 
-            self.drawShape(blackImgCopy, hand)
+            for i in range(numHands):
 
-            centerOfHand = self.getCenterOfHand(hand)
-            self.drawCenterOfHand(blackImgCopy, centerOfHand)
+                self.drawShape(blackImgCopy, hand)
 
-            hullWithPoints, hullWithoutPoints = self.getConvexHull(hand)
-            self.drawConvexHull(blackImgCopy, hullWithoutPoints)
+                centerOfHand = self.getCenterOfHand(hand)
+                self.drawCenterOfHand(blackImgCopy, centerOfHand)
 
-            topFingers = self.getFingerPointsFromHull(hullWithoutPoints, centerOfHand)
-            if topFingers is not None:
-                fingerPoints.extend(topFingers)
+                hullWithPoints, hullWithoutPoints = self.getConvexHull(hand)
+                #self.drawConvexHull(blackImgCopy, hullWithoutPoints)
 
-            defects = self.getConvexDefects(hand, hullWithPoints)
-            #fingerDefects = self.getFingerConvexDefects(blackImgCopy, defects, hand, centerOfHand)
+                topFingers = self.getFingerPointsFromHull(hullWithoutPoints, centerOfHand)
+                if topFingers is not None:
+                    fingerPoints.extend(topFingers)
 
-            self.drawDefects(blackImgCopy, centerOfHand, defects, hand)
+                defects = self.getConvexDefects(hand, hullWithPoints)
+                fingerDefects = self.getFingerConvexDefects(blackImgCopy, defects, hand, centerOfHand)
 
-            thumbPoint = self.getThumbPoint(hand, defects, centerOfHand, isLeftHand)
+                self.drawDefects(blackImgCopy, centerOfHand, defects, hand)
 
-            if fingerPoints is not None and thumbPoint is not None:
-                fingerPoints.append(thumbPoint)
+                thumbPoint = self.getThumbPoint(hand, defects, centerOfHand, isLeftHand)
 
-            fingerPoints = self.checkForOverlappingPoints(fingerPoints)
+                if fingerPoints is not None and thumbPoint is not None:
+                    fingerPoints.append(thumbPoint)
 
-            self.drawFingerPoints(blackImgCopy, fingerPoints)
+                fingerPoints = self.checkForOverlappingPoints(fingerPoints)
 
-            #second iteration
-            hand = rightHand
-            isLeftHand = True
+                self.drawFingerPoints(blackImgCopy, fingerPoints)
 
+                #second iteration
+                hand = rightHand
+                isLeftHand = True
+
+        #return (fingerPoints, blur)
         return (fingerPoints, blackImgCopy)
 
 
@@ -168,7 +172,7 @@ class FingerDetector:
 
 
     def filterBottom(self, diff, bottomLine):
-        for idx in range(bottomLine, len(diff)):
+        for idx in range(0, bottomLine):
             row = diff[idx]
             for elemIdx in range(len(row)):
                 row[elemIdx] = 0
@@ -185,7 +189,7 @@ class FingerDetector:
         if points is None:
             return None
 
-        minDist = 20
+        minDist = 5
         hasChanged = True
 
         while hasChanged:
@@ -209,20 +213,20 @@ class FingerDetector:
             if handMoments['m00'] != 0:
                 centerX = int(handMoments['m10']/handMoments['m00'])
                 centerY = int(handMoments['m01']/handMoments['m00'])
-                centerY -= centerY*0.25
+                centerY += centerY*0.1
                 centerOfHand = (centerX, int(centerY))
         return centerOfHand
 
 
     def getFingerPointsFromHull(self, hull, centerOfHand):
         centers = None
-        if hull is not None and len(hull) > 3:
+        if hull is not None and len(hull) > 3 and centerOfHand is not None:
             #k means clustering
             k = 4
             filteredCenters = None
             kmeansHull = []
             for elem in hull:
-                if elem[0][1] <= centerOfHand[1]:
+                if elem[0][1] >= centerOfHand[1]:
                     kmeansHull.append([np.float32(elem[0][0]), np.float32(elem[0][1])])
 
             kmeansHull = np.asarray(kmeansHull)
@@ -248,8 +252,9 @@ class FingerDetector:
             farthest = tuple(contour[f][0])
             end = tuple(contour[e][0])
 
-            if start[1] < center[1] and farthest[1] < center[1] and end[1] < center[1]:
-                filteredDefects.append(defect)
+            if start is not None and center is not None and end is not None:
+                if start[1] < center[1] and farthest[1] < center[1] and end[1] < center[1]:
+                    filteredDefects.append(defect)
 
 
     def getLongestDefects(self, defects, n, clockwise=True):
@@ -289,14 +294,14 @@ class FingerDetector:
                 if leftHand:
                     #if thumb is on right hand side
                     if start[0] > centerOfHand[0] and farthest[0] > centerOfHand[0] and end[0] > centerOfHand[0]:
-                        #if start is below and end is above
-                        if start[1] > centerOfHand[1] and end[1] < centerOfHand[1]:
+                        #if start is above and end is below
+                        if start[1] < centerOfHand[1] and end[1] > centerOfHand[1]:
                             maxDistance = distance
                             longestDefect = defect.copy()
                 if leftHand is False:
                     #if thumb on left hand side
                     if start[0] < centerOfHand[0] and farthest[0] < centerOfHand[0] and end[0] < centerOfHand[0]:
-                        if end[1] > centerOfHand[1] and start[1] < centerOfHand[1]:
+                        if end[1] < centerOfHand[1] and start[1] > centerOfHand[1]:
                             maxDistance = distance
                             longestDefect = defect.copy()
 
