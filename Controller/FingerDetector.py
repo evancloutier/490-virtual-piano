@@ -105,7 +105,7 @@ class FingerDetector:
                 hand = rightHand
                 isLeftHand = True
 
-        #return (fingerPoints, blur)
+        #return (fingerPoints, diff)
         return (fingerPoints, blackImgCopy)
 
 
