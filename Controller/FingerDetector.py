@@ -1,5 +1,4 @@
 import cv2
-import cv2.cv as cv
 import time
 import numpy as np
 import math
@@ -7,14 +6,16 @@ import os, sys
 import pdb
 
 
-width = 1920
-height = 1080
+#width = 1920
+#height = 1080
+width = 512
+height = 428
 blackImg = np.zeros((height,width,3), np.uint8)
 
 class FingerDetector:
     def __init__(self, bottomLine, blurPixelSize, threshVal, bothHands=True, kinect=None):
         self.vidSrc = cv2.VideoCapture(0)
-        self.background = cv2.BackgroundSubtractorMOG2()
+        self.background = cv2.createBackgroundSubtractorMOG2()
         self.buildBackgroundModel(kinect)
         self.blurPixelSize = blurPixelSize
         self.bothHands = bothHands
@@ -116,6 +117,7 @@ class FingerDetector:
 
     def buildBackgroundModel(self, kinect=None):
         print "Hit esc to exit background mode"
+        cv2.ocl.setUseOpenCL(False)
         while True:
                 frame = None
                 if kinect is None:
@@ -147,7 +149,7 @@ class FingerDetector:
 
     '''shape functions'''
     def getLargestShapes(self, frame, bothHands=False):
-        contours, contourHeirarchy = cv2.findContours(frame, cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE)
+        _, contours, contourHeirarchy = cv2.findContours(frame, cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE)
         maxContourSize = 0
         largestContour = []
         secondLargestContour = []
@@ -234,7 +236,7 @@ class FingerDetector:
             if len(kmeansHull) >= k:
                 maxIters = 100
                 criteria = (cv2.TERM_CRITERIA_EPS, 10, 0.1)
-                retval, bestLabels, centers = cv2.kmeans(kmeansHull, k, criteria, maxIters, cv2.KMEANS_PP_CENTERS)
+                retval, bestLabels, centers = cv2.kmeans(kmeansHull, k, None, criteria, maxIters, cv2.KMEANS_PP_CENTERS)
                 centers = centers.tolist()
                 centers = [[int(x), int(y)] for x,y in centers]
 
@@ -382,5 +384,5 @@ class FingerDetector:
 
 
 
-#fingerDetector = FingerDetector(300, 27, 159, False)
-#fingerDetector.continuousFingers()
+fingerDetector = FingerDetector(300, 27, 159, False)
+fingerDetector.continuousFingers()
