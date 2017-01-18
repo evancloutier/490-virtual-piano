@@ -16,8 +16,18 @@ class KeyDetector:
         gray = cv2.cvtColor(blur, cv2.COLOR_BGR2GRAY)
         thresh = cv2.threshold(gray, 251, 255, cv2.THRESH_BINARY)[1]
         
+        #set data to whatever we want to return to imshow    
+        self.data = thresh
+        getOutsideRectangle(thresh.copy())
+        
+
+    def transmitFrame(self):
+        return self.data
+
+    def getOutsideRectangle(self, frame):
+        
         #get contours
-        cnts = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        cnts = cv2.findContours(frame, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         cnts = cnts[0] if imutils.is_cv2() else cnts[1]
         
         #epsilon marks accuracy of square
@@ -27,13 +37,4 @@ class KeyDetector:
             (x, y, w, h) = cv2.boundingRect(approx)
 
             cv2.rectangle(data, (x, y), (x + w + 100, y + h), (0, 255, 0), 2)
-        
-        #set data to whatever we want to return to imshow    
-        self.data = thresh
-
-    def transmitFrame(self):
-        return self.data
-
-    def getOutsideRectangle(self):
-        pass
         
