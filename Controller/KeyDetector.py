@@ -14,7 +14,7 @@ class KeyDetector:
     def processFrame(self):
         blur = cv2.medianBlur(self.data, 31)
         gray = cv2.cvtColor(blur, cv2.COLOR_BGR2GRAY)
-        thresh = cv2.threshold(gray, 250, 255, cv2.THRESH_BINARY)[1]
+        thresh = cv2.threshold(gray, 251, 255, cv2.THRESH_BINARY)[1]
         
         #get contours
         cnts = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -26,7 +26,7 @@ class KeyDetector:
             approx = cv2.approxPolyDP(cnts, epsilon, True)
             (x, y, w, h) = cv2.boundingRect(approx)
 
-            cv2.rectangle(img, (x, y), (x + w + 100, y + h), (0, 255, 0), 2)
+            cv2.rectangle(data, (x, y), (x + w + 100, y + h), (0, 255, 0), 2)
         
         #set data to whatever we want to return to imshow    
         self.data = thresh
