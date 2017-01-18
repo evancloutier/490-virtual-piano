@@ -40,23 +40,24 @@ color_depth_map = np.zeros((424, 512),  np.int32).ravel() \
 
 keyDetector = kd.KeyDetector();
 
+
+frames = listener.waitForNewFrame()
+
+color = frames["color"]
+keyDetector.receiveFrame(color)
+
+#do processing of data in the key detector class here
+
 while True:
-    frames = listener.waitForNewFrame()
-
-    color = frames["color"]
-    keyDetector.receiveFrame(color)
-    
-    #do processing of data in the key detector class here
-
     cv2.imshow("color", cv2.resize(keyDetector.transmitFrame(),
-                                   (int(1920 / 3), int(1080 / 3))))
+                               (int(1920 / 3), int(1080 / 3))))
 
-    listener.release(frames)
+    k = cv2.waitKey(10)
 
-    key = cv2.waitKey(delay=1)
-    if key == ord('q'):
+    if k == 27:
         break
 
+listener.release(frames)
 device.stop()
 device.close()
 
