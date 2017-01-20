@@ -21,44 +21,78 @@ except:
 logger = createConsoleLogger(LoggerLevel.Debug)
 setGlobalLogger(logger)
 
+# Initialize the Freenect2 instance
 fn = Freenect2()
+
+# Check for registered devices
 num_devices = fn.enumerateDevices()
 if num_devices == 0:
     print("No device connected!")
     sys.exit(1)
 
+# Register serial numbers and open device pipeline
 serial = fn.getDeviceSerialNumber(0)
-device = fn.openDevice(serial, pipeline=pipeline)
+device = fn.openDevice(serial, pipeline = pipeline)
 
+# Initialize listener
 listener = SyncMultiFrameListener(FrameType.Color)
 
 # Register listener
 device.setColorFrameListener(listener)
 device.start()
 
-color_depth_map = np.zeros((424, 512),  np.int32).ravel() \
+# Create key detector
+keyDetector = kd.KeyDetector()
 
-keyDetector = kd.KeyDetector();
+# Initialize key contours
+print "Hit ESCAPE to retrieve key contours"
 
-
-frames = listener.waitForNewFrame()
-
-color = frames["color"]
-keyDetector.receiveFrame(color)
-
-#do processing of data in the key detector class here
-
+# Wait for user to hit escape to extract key contours
 while True:
-    cv2.imshow("color", cv2.resize(keyDetector.transmitFrame(),
-                               (int(1920 / 3), int(1080 / 3))))
+    frames = listener.waitForNewFrame()
+    color = frames["color"]
+
+    keyDetector.getKeyContours(color)
+    cv2.imshow("Color", cv2.resize(color.asarray(), (int(1920 / 3), int(1080 / 3))))
+    listener.release(frames)
+
+    k = cv2.waitKey(10)
+
+    if k == 27:
+        cv2.destroyAllWindows()
+        break
+
+# Now we display the key contours
+while True:
+    frames = listener.waitForNewFrame()
+    color = frames["color"]
+    keyDetector.receiveFrame(color)
+
+    for contour in keyDetector.transmitKeyContours():
+        c = contour[0]
+        cv2.drawContours(color.asarray(), [c], -1, (0, 0, 0), 2)
+        cv2.circle(color.asarray(), (contour[1], contour[2]), 7, (0, 0, 0), -1)
+    cv2.imshow("Contours", cv2.resize(color.asarray(), (int(1920 / 3), int(1080 / 3))))
+
+    listener.release(frames)
 
     k = cv2.waitKey(10)
 
     if k == 27:
         break
 
-listener.release(frames)
 device.stop()
 device.close()
 
 sys.exit(0)
+
+# octave = ["B", "Bb", "A", "Ab", "G", "Gb", "F", "E", "Eb", "D", "Db", "C"]
+# index = 0
+
+# for contour in contours:
+#     c = contour[1]
+#     cv2.drawContours(frame.asarray(), [c], -1, (0, 255, 0), 2)
+#     cv2.circle(frame.asarray(), (contour[2], contour[3]), 7, (0, 0, 0), -1)
+#     # cv2.putText(frame.asarray(), octave[index], (contour[2], contour[3] + 20),
+#         # cv2.FONT_HERSHEY_SIMPLEX, 1.1, (0, 0, 0), 2)
+#     # index += 1

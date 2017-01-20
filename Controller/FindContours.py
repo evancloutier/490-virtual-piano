@@ -10,9 +10,9 @@ import cv2
 # ---> We will also know where an octave starts and ends based on the number of contours identified (hopefully)
 # - Need to extract the key points from each contour to relate their bounds to the hands
 
-ap = argparse.ArgumentParser()
-ap.add_argument("-i", "--image", required = True, help = "path to the input image")
-args = vars(ap.parse_args())
+# ap = argparse.ArgumentParser()
+# ap.add_argument("-i", "--image", required = True, help = "path to the input image")
+# args = vars(ap.parse_args())
 
 image = cv2.imread(args["image"])
 resized = imutils.resize(image, width = 300)
@@ -22,7 +22,7 @@ gray = cv2.cvtColor(resized, cv2.COLOR_BGR2GRAY)
 thresh = cv2.threshold(gray, 130, 255, cv2.THRESH_BINARY)[1]
 
 cnts = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-cnts = cnts[0] if imutils.is_cv2() else cnts[1]
+cnts = cnts[1]
 
 contours = []
 
