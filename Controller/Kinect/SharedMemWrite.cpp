@@ -34,21 +34,23 @@ void* ImageWrite::createSemaphore() {
 
 unsigned char* ImageWrite::scaleDownImage(bgrx* originalPayload) {
   //original image is 1920 * 1080
-  //scaled down new image is 512 * 424
+  //scaled down new image is 1024 * 848
 
-  bgr* newPayload = (bgr*)malloc(depthWidth * depthHeight * sizeof(bgr));
+  bgr* newPayload = (bgr*)malloc(desiredRgbWidth * desiredRgbHeight * sizeof(bgr));
 
   int baseIdx;
   float height = 0;
   float width = 0;
-  for(int newIdx = 0; newIdx < depthWidth * depthHeight; newIdx += 1) {
+
+  for(int newIdx = 0; newIdx < desiredRgbWidth * desiredRgbHeight; newIdx += 1) {
     baseIdx = round(width) + rgbWidth * round(height);
+
     newPayload[newIdx] = originalPayload[baseIdx];
 
-    width += ((float)rgbWidth/depthWidth);
+    width += ((float)rgbWidth/desiredRgbWidth);
     if(width >= rgbWidth) {
       width = 0;
-      height += ((float)rgbHeight/depthHeight);
+      height += ((float)rgbHeight/desiredRgbHeight);
     }
 
   }
@@ -60,8 +62,6 @@ void ImageWrite::getFramesAndWriteToBuff(bool enableRGB, bool enableDepth, bool 
   //get frames from kinect
   int writing = ImageWrite::Writing;
   int reading = ImageWrite::Reading;
-
-  //for(int i = 0; i < 2; i++) {
 
   memcpy(semaphore, &writing, ImageWrite::BuffSize);
 
@@ -77,8 +77,8 @@ void ImageWrite::getFramesAndWriteToBuff(bool enableRGB, bool enableDepth, bool 
     rgbPayload = scaleDownImage((bgrx*)rgbPayload);
     //unsigned char* depthPayload = (unsigned char*)kinect.depthFrame->data;
     //unsigned char* irPayload = (unsigned char*)kinect.irFrame->data;
-
     //copy values to shared mem
+
     writeToMem(rgbMem, rgbPayload, rgbMemSize);
     //writeToMem(depthMem, depthPayload, depthMemSize);
     //writeToMem(irMem, irPayload, irMemSize);
@@ -86,7 +86,7 @@ void ImageWrite::getFramesAndWriteToBuff(bool enableRGB, bool enableDepth, bool 
     //release semaphore
     memcpy(semaphore, &reading, ImageWrite::BuffSize);
 
-    free(rgbPayload);
+    //free(rgbMem);
 
   }
 
@@ -108,10 +108,10 @@ void* ImageWrite::getMemory(int imageType) {
 
   if(imageType == ImageWrite::RGB) {
     frame = kinect.rgbFrame;
-    //downscale frame dimensions
-    bufferSize = depthWidth * depthHeight * rgbBytesPerPixel;
+    bufferSize = desiredRgbWidth * desiredRgbHeight * desiredRgbBytesPerPixel;
     rgbMemSize = bufferSize;
   }
+
   else if(imageType == ImageWrite::Depth) {
     frame = kinect.depthFrame;
     bufferSize = frame->width * frame->height * frame->bytes_per_pixel;

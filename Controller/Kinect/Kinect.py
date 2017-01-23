@@ -7,12 +7,14 @@ import cv2
 import numpy
 
 
-sharedMemKeyLoc = "memkey.txt"
-semaphoreKeyLoc = "semkey.txt"
+sharedMemKeyLoc = "Kinect/memkey.txt"
+semaphoreKeyLoc = "Kinect/semkey.txt"
+#sharedMemKeyLoc = "memkey.txt"
+#semaphoreKeyLoc = "semkey.txt"
 rgbIdx = 0
 depthIdx = 1
-width = 512
-height = 424
+width = 1000
+height = 500
 
 semReading = 1
 semWriting = 0
@@ -59,7 +61,7 @@ class Kinect:
         self.semaphore.write(chr(semWriting))
 
 
-    def getImage(self, sharedMem):
+    def getFrame(self, sharedMem):
         self.getSemaphore()
         imgBuff = self.readMem(sharedMem)
         self.releaseSemaphore()
@@ -69,18 +71,13 @@ class Kinect:
         cv2Image = numpy.array(pilImage)
         return cv2Image
 
-    def invertImage(self, cv2Im):
-        revIm = (255 - cv2Im)
-        return revIm
 
-
+'''
 kinect = Kinect()
 while True:
-    cv2Im = kinect.getImage(kinect.rgbSharedMem)
-    invert = kinect.invertImage(cv2Im)
-    cv2.imshow('input', invert)
+    cv2Im = kinect.getFrame(kinect.rgbSharedMem)
+    cv2.imshow("test", cv2Im)
     k = cv2.waitKey(10)
     if k == 27:
         break
-#trivial image inversion
-#kinect.invertImage(cv2Im)
+'''
