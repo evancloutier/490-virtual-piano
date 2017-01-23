@@ -51,6 +51,9 @@ class ImageWrite {
 
     int rgbWidth = 1920;
     int rgbHeight = 1080;
+    int desiredRgbWidth = 1000;
+    int desiredRgbHeight = 500;
+    int desiredRgbBytesPerPixel = 3;
     int depthWidth = 512;
     int depthHeight = 424;
     int rgbBytesPerPixel = 3;

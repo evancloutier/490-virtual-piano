@@ -19,8 +19,8 @@ semaphoreKeyLoc = "Kinect/semkey.txt"
 #semaphoreKeyLoc = "semkey.txt"
 rgbIdx = 0
 depthIdx = 1
-width = 1920
-height = 1080
+width = 1000
+height = 500
 
 semReading = 1
 semWriting = 0
@@ -92,17 +92,13 @@ class Kinect:
             cv2Image = numpy.array(pilImage)
             return cv2Image
 
-    def invertImage(self, cv2Im):
-        revIm = (255 - cv2Im)
-        cv2.imwrite("/home/evan/reverse.png", revIm)
 
-
-#kinect = Kinect()
-#while True:
-#    cv2Im = kinect.getFrame(kinect.rgbSharedMem)
-#    cv2.imshow("test", cv2Im)
-#    k = cv2.waitKey(10)
-#    if k == 27:
-#        break
-#trivial image inversion
-#kinect.invertImage(cv2Im)
+'''
+kinect = Kinect()
+while True:
+    cv2Im = kinect.getFrame(kinect.rgbSharedMem)
+    cv2.imshow("test", cv2Im)
+    k = cv2.waitKey(10)
+    if k == 27:
+        break
+'''

@@ -34,28 +34,26 @@ void* ImageWrite::createSemaphore() {
 
 unsigned char* ImageWrite::scaleDownImage(bgrx* originalPayload) {
   //original image is 1920 * 1080
-  //scaled down new image is 512 * 424
+  //scaled down new image is 1024 * 848
 
-  bgr* newPayload = (bgr*)malloc(rgbWidth * rgbHeight * sizeof(bgr));
+  bgr* newPayload = (bgr*)malloc(desiredRgbWidth * desiredRgbHeight * sizeof(bgr));
 
   int baseIdx;
   float height = 0;
   float width = 0;
-  for(int idx = 0; idx < rgbWidth * rgbHeight; idx += 1) {
-    newPayload[idx] = originalPayload[idx];
-    //cout << "idx: " << idx << endl;
-  }
-  /*for(int newIdx = 0; newIdx < depthWidth * depthHeight; newIdx += 1) {
+
+  for(int newIdx = 0; newIdx < desiredRgbWidth * desiredRgbHeight; newIdx += 1) {
     baseIdx = round(width) + rgbWidth * round(height);
+
     newPayload[newIdx] = originalPayload[baseIdx];
 
-    width += ((float)rgbWidth/depthWidth);
+    width += ((float)rgbWidth/desiredRgbWidth);
     if(width >= rgbWidth) {
       width = 0;
-      height += ((float)rgbHeight/depthHeight);
+      height += ((float)rgbHeight/desiredRgbHeight);
     }
 
-  }*/
+  }
 
   return (unsigned char*)newPayload;
 }
@@ -79,8 +77,8 @@ void ImageWrite::getFramesAndWriteToBuff(bool enableRGB, bool enableDepth, bool 
     rgbPayload = scaleDownImage((bgrx*)rgbPayload);
     //unsigned char* depthPayload = (unsigned char*)kinect.depthFrame->data;
     //unsigned char* irPayload = (unsigned char*)kinect.irFrame->data;
-
     //copy values to shared mem
+
     writeToMem(rgbMem, rgbPayload, rgbMemSize);
     //writeToMem(depthMem, depthPayload, depthMemSize);
     //writeToMem(irMem, irPayload, irMemSize);
@@ -110,10 +108,7 @@ void* ImageWrite::getMemory(int imageType) {
 
   if(imageType == ImageWrite::RGB) {
     frame = kinect.rgbFrame;
-    //downscale frame dimensions
-    bufferSize = frame->width * frame->height * 3;//frame->bytes_per_pixel;
-    //cout << "width: " << frame->width << " height: " << frame->height << " size: " << frame->bytes_per_pixel << endl;
-    //bufferSize = depthWidth * depthHeight * rgbBytesPerPixel;
+    bufferSize = desiredRgbWidth * desiredRgbHeight * desiredRgbBytesPerPixel;
     rgbMemSize = bufferSize;
   }
 
