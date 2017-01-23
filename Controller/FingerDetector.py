@@ -15,7 +15,7 @@ blackImg = np.zeros((height,width,3), np.uint8)
 class FingerDetector:
     def __init__(self, bottomLine, blurPixelSize, threshVal, bothHands=True, kinect=None):
         self.vidSrc = cv2.VideoCapture(0)
-        self.background = cv2.createBackgroundSubtractorKNN(history=500, dist2Threshold=2000.0)
+        self.background = cv2.bgsegm.createBackgroundSubtractorMOG()
         self.buildBackgroundModel(kinect)
         self.blurPixelSize = blurPixelSize
         self.bothHands = bothHands
@@ -53,7 +53,7 @@ class FingerDetector:
         if frame is None:
             frame = self.getFrame()
 
-        diff = self.background.apply(frame)
+        diff = self.background.apply(frame, learningRate=0)
         diff = self.filterBottom(diff, self.bottomLine)
         blackImgCopy = self.getBackgroundCopy()
         self.drawBottomLine(blackImgCopy, self.bottomLine)
@@ -106,7 +106,7 @@ class FingerDetector:
                 hand = rightHand
                 isLeftHand = True
 
-        #return (fingerPoints, thresh)
+        #return (fingerPoints, diff)
         return (fingerPoints, blackImgCopy)
 
 
@@ -129,7 +129,6 @@ class FingerDetector:
                 cv2.imshow('Foreground', fgmask)
                 cv2.imshow('Original', frame)
                 if cv2.waitKey(10) == ord('z'):
-                    self.background.setHistory(0)
                     break
 
 
