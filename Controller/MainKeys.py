@@ -70,7 +70,7 @@ while True:
 
     for contour in keyDetector.transmitKeyContours():
         c = contour[0]
-        cv2.drawContours(color.asarray(), [c], -1, (0, 0, 0), 2)
+        cv2.drawContours(color.asarray(), [c], -1, (0, 0, 0), 10)
         cv2.circle(color.asarray(), (contour[1], contour[2]), 7, (0, 0, 0), -1)
     cv2.imshow("Contours", cv2.resize(color.asarray(), (int(1920 / 3), int(1080 / 3))))
 
