@@ -1,11 +1,17 @@
 import sys
-from PIL import Image
-sys.path.append('/usr/local/lib/python2.7/site-packages')
-import sysv_ipc
-import struct
+import platform
 import cv2
 import numpy
 
+system = platform.system()
+
+if system != 'Darwin':
+    from PIL import Image
+    sys.path.append('/usr/local/lib/python2.7/site-packages')
+    import sysv_ipc
+    import struct
+else:
+    import PyKinect as PyKinect
 
 sharedMemKeyLoc = "Kinect/memkey.txt"
 semaphoreKeyLoc = "Kinect/semkey.txt"
@@ -23,9 +29,18 @@ class Kinect:
     def __init__(self):
         self.semaphoreKey = self.getSemaphoreKey()
         self.semaphore = self.getSharedMemByKey(self.semaphoreKey)
+        self.listener, self.device, self.frames = None
+
+        if system == 'Darwin':
+            self.listener, self.device = PyKinect.initializeKinect()
+            self.frames = self.listener.waitForNewFrame()
 
         self.rgbKey, self.depthKey = self.getSharedMemKeys()
         self.rgbSharedMem = self.getSharedMemByKey(self.rgbKey)
+
+    def exitKinect(self):
+        self.device.stop()
+        self.device.close()
 
     def getSharedMemKeys(self):
         keyFiles = open(sharedMemKeyLoc)
@@ -62,14 +77,20 @@ class Kinect:
 
 
     def getFrame(self, sharedMem):
-        self.getSemaphore()
-        imgBuff = self.readMem(sharedMem)
-        self.releaseSemaphore()
+        if system == 'Darwin' and self.listener != None:
+            self.listener.release(self.frames)
+            self.frames = self.listener.waitForNewFrame()
 
-        pilImage = Image.frombytes("RGB", (width, height), imgBuff)
-        #pilImage.save("/home/evan/rgb.png", "PNG")
-        cv2Image = numpy.array(pilImage)
-        return cv2Image
+            return self.frames
+        else:
+            self.getSemaphore()
+            imgBuff = self.readMem(sharedMem)
+            self.releaseSemaphore()
+
+            pilImage = Image.frombytes("RGB", (width, height), imgBuff)
+            #pilImage.save("/home/evan/rgb.png", "PNG")
+            cv2Image = numpy.array(pilImage)
+            return cv2Image
 
     def invertImage(self, cv2Im):
         revIm = (255 - cv2Im)
