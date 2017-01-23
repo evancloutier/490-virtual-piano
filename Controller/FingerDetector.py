@@ -56,9 +56,9 @@ class FingerDetector:
             frame = self.getFrame()
 
         diff = self.background.apply(frame, learningRate=0)
-        diff = self.filterBottom(diff, self.bottomLine)
+        diff = self.filterOutside(diff)
         blackImgCopy = self.getBackgroundCopy()
-        self.drawBottomLine(blackImgCopy, self.bottomLine)
+        self.drawOutsideFilter(blackImgCopy)
         blur = self.blurFrame(diff, self.blurPixelSize)
         thresh = self.thresholdFrame(blur, self.threshVal)
 
@@ -131,6 +131,7 @@ class FingerDetector:
                 cv2.imshow('Foreground', fgmask)
                 cv2.imshow('Original', frame)
                 if cv2.waitKey(10) == ord('z'):
+                    cv2.destroyAllWindows()
                     break
 
 
@@ -176,11 +177,11 @@ class FingerDetector:
         return hull, hull1
 
 
-    def filterBottom(self, diff, bottomLine):
-        for idx in range(0, bottomLine):
-            row = diff[idx]
-            for elemIdx in range(len(row)):
-                row[elemIdx] = 0
+    def filterOutside(self, diff):
+        for xIdx in range(0, width):
+            for yIdx in range(0, height):
+                if xIdx < self.leftLineX or xIdx > self.rightLineX or yIdx < self.bottomLineY:
+                    diff[yIdx][xIdx] = 0
         return diff
 
 
@@ -347,9 +348,15 @@ class FingerDetector:
             cv2.drawContours(frame, contour, -1, (255,255,255), thickness=5)
             cv2.fillPoly(frame, pts=[contour], color=(255,255,255))
 
-    def drawBottomLine(self, frame, bottomLine):
-        start = (0, bottomLine)
-        end = (width, bottomLine)
+    def drawOutsideFilter(self, frame):
+        start= (0, self.bottomLineY)
+        end = (width, self.bottomLineY)
+        cv2.line(frame, start, end, (0,255,255), thickness=3)
+        start = (self.leftLineX, 0)
+        end = (self.leftLineX, height)
+        cv2.line(frame, start, end, (0,255,255), thickness=3)
+        start = (self.rightLineX, 0)
+        end = (self.rightLineX, height)
         cv2.line(frame, start, end, (0,255,255), thickness=3)
 
     def drawConvexHull(self, frame, contour):

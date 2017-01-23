@@ -99,7 +99,7 @@ class KeyDetector:
 
             cv2.imshow('bounding rectange', frame)
 
-        return (x - self.xoffset, x + w + self.xoffset, y + h + self.yoffset)
+        return (x - self.xoffset, x + w + self.xoffset, y)
 
 
     def transmitFrame(self):

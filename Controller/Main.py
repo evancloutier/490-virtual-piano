@@ -9,7 +9,9 @@ class Main:
         self.kinect = Kinect.Kinect()
         self.keyDetector = KeyDetector.KeyDetector(self.kinect)
         leftLineX, rightLineX, bottomLineY = self.keyDetector.getBounds()
-        self.fingerDetector = FingerDetector.FingerDetector(0, 9, 159, False, self.kinect)
+        blurSize = 7
+        threshVal = 159
+        self.fingerDetector = FingerDetector.FingerDetector(leftLineX, rightLineX, bottomLineY, blurSize, threshVal, False, self.kinect)
 
     def controlLoop(self):
         #keyCoords = getKeyPositions
@@ -31,7 +33,7 @@ class Main:
                 self.fingerDetector.adjustParams(k)
 
             cv2.imshow('fingers', fingerImage)
-            #cv2.imshow('normal', frame)
+            cv2.imshow('normal', frame)
 
 
 main = Main()
