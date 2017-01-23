@@ -8,14 +8,14 @@ import pdb
 
 #width = 1920
 #height = 1080
-width = 512
-height = 428
+width = 1000
+height = 500
 blackImg = np.zeros((height,width,3), np.uint8)
 
 class FingerDetector:
     def __init__(self, bottomLine, blurPixelSize, threshVal, bothHands=True, kinect=None):
         self.vidSrc = cv2.VideoCapture(0)
-        self.background = cv2.createBackgroundSubtractorMOG2()
+        self.background = cv2.bgsegm.createBackgroundSubtractorMOG()
         self.buildBackgroundModel(kinect)
         self.blurPixelSize = blurPixelSize
         self.bothHands = bothHands
@@ -38,8 +38,9 @@ class FingerDetector:
 
     def continuousFingers(self):
         while True:
-            #frame = self.getFrame()
-            fingerPoints, fingerImage = self.getFingerPositions()
+            frame = self.getFrame()
+            #frame = self.kinect.getFrame()
+            fingerPoints, fingerImage = self.getFingerPositions(frame)
             k = cv2.waitKey(10)
             if k == 27:
                 break
@@ -52,7 +53,7 @@ class FingerDetector:
         if frame is None:
             frame = self.getFrame()
 
-        diff = self.background.apply(frame)
+        diff = self.background.apply(frame, learningRate=0)
         diff = self.filterBottom(diff, self.bottomLine)
         blackImgCopy = self.getBackgroundCopy()
         self.drawBottomLine(blackImgCopy, self.bottomLine)
@@ -89,8 +90,8 @@ class FingerDetector:
 
                 defects = self.getConvexDefects(hand, hullWithPoints)
                 fingerDefects = self.getFingerConvexDefects(blackImgCopy, defects, hand, centerOfHand)
-
-                self.drawDefects(blackImgCopy, centerOfHand, defects, hand)
+                fingerDefects = []
+                #self.drawDefects(blackImgCopy, centerOfHand, defects, hand)
 
                 thumbPoint = self.getThumbPoint(hand, defects, centerOfHand, isLeftHand)
 
@@ -124,10 +125,10 @@ class FingerDetector:
                     frame = self.getFrame()
                 else:
                     frame = kinect.getFrame(kinect.rgbSharedMem)
-                fgmask = self.background.apply(frame, learningRate=0.1)
+                fgmask = self.background.apply(frame)
                 cv2.imshow('Foreground', fgmask)
                 cv2.imshow('Original', frame)
-                if cv2.waitKey(10) == 27:
+                if cv2.waitKey(10) == ord('z'):
                     break
 
 
@@ -215,7 +216,7 @@ class FingerDetector:
             if handMoments['m00'] != 0:
                 centerX = int(handMoments['m10']/handMoments['m00'])
                 centerY = int(handMoments['m01']/handMoments['m00'])
-                centerY += centerY*0.1
+                centerY += centerY*0.3
                 centerOfHand = (centerX, int(centerY))
         return centerOfHand
 
@@ -297,13 +298,13 @@ class FingerDetector:
                     #if thumb is on right hand side
                     if start[0] > centerOfHand[0] and farthest[0] > centerOfHand[0] and end[0] > centerOfHand[0]:
                         #if start is above and end is below
-                        if start[1] < centerOfHand[1] and end[1] > centerOfHand[1]:
+                        if start[1] > centerOfHand[1] and farthest[1] < centerOfHand[1]:
                             maxDistance = distance
                             longestDefect = defect.copy()
                 if leftHand is False:
                     #if thumb on left hand side
                     if start[0] < centerOfHand[0] and farthest[0] < centerOfHand[0] and end[0] < centerOfHand[0]:
-                        if end[1] < centerOfHand[1] and start[1] > centerOfHand[1]:
+                        if farthest[1] < centerOfHand[1] and end[1] > centerOfHand[1]:
                             maxDistance = distance
                             longestDefect = defect.copy()
 
@@ -314,7 +315,7 @@ class FingerDetector:
         if leftHand:
             thumbPoint = ((contour[s][0][0] + contour[f][0][0]) / 2, (contour[s][0][1] + contour[f][0][1]) / 2)
         elif leftHand is False:
-            thumbPoint = ((contour[e][0][0] + contour[f][0][0]) / 2, (contour[e][0][1] + contour[f][0][1]) / 2)
+            thumbPoint = ((contour[s][0][0] + contour[f][0][0]) / 2, (contour[s][0][1] + contour[f][0][1]) / 2)
         return thumbPoint
 
 
@@ -380,9 +381,9 @@ class FingerDetector:
                 end = tuple(contour[e][0])
                 #if start[0] > centerOfHand[0] and farthest[0] > centerOfHand[0] and end[0] > centerOfHand[0]:
                 cv2.line(frame, start, farthest, (0,255,0), thickness=5)
-                cv2.line(frame, farthest, end, (0,255,0), thickness=5)
+                #cv2.line(frame, farthest, end, (0,255,0), thickness=5)
 
 
 
-fingerDetector = FingerDetector(300, 27, 159, False)
-fingerDetector.continuousFingers()
+#fingerDetector = FingerDetector(300, 27, 159, False)
+#fingerDetector.continuousFingers()

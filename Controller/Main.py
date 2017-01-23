@@ -1,19 +1,21 @@
 import cv2
 import Kinect.Kinect as Kinect
-import FingerDetector as FD
+import FingerDetector
+import KeyDetector
 
 
 class Main:
     def __init__(self):
         self.kinect = Kinect.Kinect()
-        self.fd = FD.FingerDetector(500, 9, 159, False, self.kinect)
-
+        self.keyDetector = KeyDetector.KeyDetector(self.kinect)
+        leftLineX, rightLineX, bottomLineY = self.keyDetector.getBounds()
+        self.fingerDetector = FingerDetector.FingerDetector(0, 9, 159, False, self.kinect)
 
     def controlLoop(self):
         #keyCoords = getKeyPositions
         while True:
             frame = self.kinect.getFrame(self.kinect.rgbSharedMem)
-            fingerPoints, fingerImage = self.fd.getFingerPositions(frame)
+            fingerPoints, fingerImage = self.fingerDetector.getFingerPositions(frame)
 
             #for fingerPoint in fingerPoints:
                 #key = getkeyFromFinger(fingerCoord)
@@ -26,7 +28,7 @@ class Main:
             if k == 27:
                 break
             else:
-                self.fd.adjustParams(k)
+                self.fingerDetector.adjustParams(k)
 
             cv2.imshow('fingers', fingerImage)
             #cv2.imshow('normal', frame)
