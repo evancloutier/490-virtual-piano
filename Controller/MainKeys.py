@@ -36,19 +36,19 @@ listener = SyncMultiFrameListener(FrameType.Color)
 device.setColorFrameListener(listener)
 device.start()
 
-color_depth_map = np.zeros((424, 512),  np.int32).ravel() \
+color_depth_map = np.zeros((424, 512),  np.int32).ravel()
 
 keyDetector = kd.KeyDetector();
 
 
-frames = listener.waitForNewFrame()
-
-color = frames["color"]
-keyDetector.receiveFrame(color)
-
-#do processing of data in the key detector class here
 
 while True:
+    frames = listener.waitForNewFrame()
+
+    color = frames["color"]
+    keyDetector.receiveFrame(color)
+    #do processing of data in the key detector class here
+    
     cv2.imshow("color", cv2.resize(keyDetector.transmitFrame(),
                                (int(1920 / 3), int(1080 / 3))))
 
@@ -57,7 +57,8 @@ while True:
     if k == 27:
         break
 
-listener.release(frames)
+    listener.release(frames)    
+
 device.stop()
 device.close()
 
