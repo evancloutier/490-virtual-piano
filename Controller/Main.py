@@ -6,7 +6,7 @@ import FingerDetector as FD
 class Main:
     def __init__(self):
         self.kinect = Kinect.Kinect()
-        self.fd = FD.FingerDetector(500, 9, 159, False, self.kinect)
+        self.fd = FD.FingerDetector(0, 9, 159, False, self.kinect)
 
 
     def controlLoop(self):
