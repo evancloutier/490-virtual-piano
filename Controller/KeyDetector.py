@@ -26,7 +26,7 @@ class KeyDetector:
                 continue
 
             # Eliminate smaller contours based on area
-            if int(M["m00"]) < 2500:
+            if int(M["m00"]) < 3000:
                 continue
             else:
                 cX = int((M["m10"] / M["m00"]))
@@ -38,25 +38,33 @@ class KeyDetector:
         self.contours = contours
 
     def getOutsideContours(self, frame):
-        gray = cv2.cvtColor(frame.asarray(), cv2.COLOR_BGR2GRAY)
+        blur = cv2.medianBlur(frame.asarray(), 37)
+        gray = cv2.cvtColor(blur, cv2.COLOR_BGR2GRAY)
         thresh = cv2.threshold(gray, 251, 255, cv2.ADAPTIVE_THRESH_MEAN_C)[1]
+        
 
         cnts = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         cnts = cnts[0] if imutils.is_cv2() else cnts[1]
         contours = []
         
-        cv2.drawContours(self.data, cnts[1], -1, [255,0,0], 2)
-#        cv2.drawContours(self.data, cnts, -1, [255,0,0], 2)
+        for idx, c in enumerate(cnts):
+            M = cv2.moments(c)
+            
+            if all(x == 0 for x in M.values()):
+                continue
+            if int(M["m00"]) < 45000:
+                continue
+            contours.append(c)
         
-        #epsilon marks accuracy of square
-        #epsilon = 0.1*cv2.arcLength(cnts, True)
-        #approx = cv2.approxPolyDP(cnts, epsilon, True)
-        #(x, y, w, h) = cv2.boundingRect(approx)
+        self.boundedConts = contours
+        
 
-        #cv2.rectangle(self.data, (x, y), (x + w + 100, y + h), (0, 255, 0), 2)
         
     def transmitFrame(self):
         return self.data
 
     def transmitKeyContours(self):
         return self.contours
+    
+    def transmitBounds(self):
+        return self.boundedConts
