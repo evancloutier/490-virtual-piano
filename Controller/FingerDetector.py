@@ -13,13 +13,15 @@ height = 500
 blackImg = np.zeros((height,width,3), np.uint8)
 
 class FingerDetector:
-    def __init__(self, bottomLine, blurPixelSize, threshVal, bothHands=True, kinect=None):
+    def __init__(self, leftLineX, rightLineX, bottomLineY, blurPixelSize, threshVal, bothHands=True, kinect=None):
         self.vidSrc = cv2.VideoCapture(0)
         self.background = cv2.bgsegm.createBackgroundSubtractorMOG()
         self.buildBackgroundModel(kinect)
         self.blurPixelSize = blurPixelSize
         self.bothHands = bothHands
-        self.bottomLine = bottomLine
+        self.leftLineX = leftLineX
+        self.rightLineX = rightLineX
+        self.bottomLineY = bottomLineY
         self.threshVal = threshVal
 
     def adjustParams(self, k):
