@@ -10,6 +10,7 @@ class KeyDetector:
     def __init__(self, kinect):
         self.kinect = kinect
 
+        # Note this while loop should eventually be moved into Main.py
         while True:
             self.frame = self.kinect.getFrame(ft.Color)
             self.getKeyContours()
@@ -39,12 +40,11 @@ class KeyDetector:
             if all(x == 0 for x in M.values()):
                 continue
 
-
             # TO-DO: Sort by a smaller bounding area, and keep contours
             # based on their minimal differences in area, since we know that
             # the keys are very similar in size
             # Eliminate smaller contours based on area
-            if int(M["m00"]) < 2500:
+            if int(M["m00"]) < 500:
                 continue
             else:
                 cX = int((M["m10"] / M["m00"]))
@@ -52,7 +52,6 @@ class KeyDetector:
                 contour = [c, cX, cY]
                 contours.append(contour)
         contours.sort(key = lambda x: x[1])
-
         self.contours = contours
 
 

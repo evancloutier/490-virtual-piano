@@ -2,30 +2,30 @@ import cv2
 import Kinect.Kinect as Kinect
 import FingerDetector
 import KeyDetector
+import BoundsDetector
 import FrameType
 
 ft = FrameType.FrameType()
 
-
 class Main:
     def __init__(self):
         self.kinect = Kinect.Kinect()
-        self.keyDetector = KeyDetector.KeyDetector(self.kinect)
+        # self.boundsDetector = BoundsDetector.BoundsDetector(self.kinect)
         # leftLineX, rightLineX, bottomLineY = self.keyDetector.getBounds()
-        blurSize = 7
-        threshVal = 159
+        # blurSize = 7
+        # threshVal = 159
         # self.fingerDetector = FingerDetector.FingerDetector(leftLineX, rightLineX, bottomLineY, blurSize, threshVal, False, self.kinect)
 
     def controlLoop(self):
         while True:
             frame = self.kinect.getFrame(ft.Color)
 
-            for contour in self.keyDetector.contours:
-                c = contour[0]
-                cv2.drawContours(frame, [c], -1, (0, 0, 0), 5)
-                cv2.circle(frame, (contour[1], contour[2]), 7, (0, 0, 0), -1)
+            # for contour in self.keyDetector.contours:
+            #     c = contour[0]
+            #     cv2.drawContours(frame, [c], -1, (0, 0, 0), 5)
+            #     cv2.circle(frame, (contour[1], contour[2]), 7, (0, 0, 0), -1)
 
-            cv2.imshow("Color", cv2.resize(frame, (int(1920 / 3), int(1080 / 3))))
+            cv2.imshow("Depth", cv2.resize(frame, (int(1920 / 3), int(1080 / 3))))
             self.kinect.releaseFrame()
 
             k = cv2.waitKey(10)

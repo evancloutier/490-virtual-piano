@@ -62,10 +62,12 @@ class Kinect:
             self.device = self.fn.openDevice(self.serial, pipeline = self.pipeline)
 
             # Initialize listener
-            self.listener = SyncMultiFrameListener(FrameType.Color)
+            self.listener = SyncMultiFrameListener(FrameType.Color | FrameType.Ir | FrameType.Depth)
+
 
             # Register listener
             self.device.setColorFrameListener(self.listener)
+            self.device.setIrAndDepthFrameListener(self.listener)
             self.device.start()
 
             # Retrieve and release the first frame for initialization
