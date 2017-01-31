@@ -8,12 +8,9 @@ import pdb
 from matplotlib import pyplot as plt
 from skimage.morphology import skeletonize
 
+width = 1920
+height = 1080
 
-
-#width = 1920
-#height = 1080
-width = 1000
-height = 500
 blackImg = np.zeros((height,width,3), np.uint8)
 
 class FingerDetector:
@@ -117,7 +114,8 @@ class FingerDetector:
     def buildSkinColorHistogram(self, kinect):
         handHistogram = None
         while True:
-            frame = kinect.getFrame(kinect.rgbSharedMem)
+            frame = kinect.getFrame()["color"].asarray()
+            # frame = kinect.getFrame(kinect.rgbSharedMem)
             originalFrame = frame.copy()
             samplePoints = self.getSkinSamples(frame)
 
@@ -222,15 +220,11 @@ class FingerDetector:
         return frame
 
 
-    def buildBackgroundModel(self, kinect=None):
+    def buildBackgroundModel(self, kinect):
         print "Hit esc to exit background mode"
         cv2.ocl.setUseOpenCL(False)
         while True:
-                frame = None
-                if kinect is None:
-                    frame = self.getFrame()
-                else:
-                    frame = kinect.getFrame(kinect.rgbSharedMem)
+                frame = kinect.getFrame()["color"].asarray()
                 fgmask = self.background.apply(frame)
                 cv2.imshow('Foreground', fgmask)
                 cv2.imshow('Original', frame)
