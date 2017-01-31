@@ -1,21 +1,19 @@
 import cv2
 import numpy as np
 import imutils
-import FrameType
-
-ft = FrameType.FrameType()
 
 class KeyDetector:
 
-    def __init__(self, kinect):
+    def __init__(self, kinect, bounds):
         self.kinect = kinect
 
-        # Note this while loop should eventually be moved into Main.py
         while True:
-            self.frame = self.kinect.getFrame(ft.Color)
+            self.frames = self.kinect.getFrame()
+            color = self.frames["color"].asarray()
+            self.bounded = color[bounds[1]: bounds[3], bounds[0]: bounds[2]]
             self.getKeyContours()
 
-            cv2.imshow("Color", cv2.resize(self.frame, (int(1920 / 3), int(1080 / 3))))
+            cv2.imshow("Color", cv2.resize(self.bounded, (int(1920 / 3), int(1080 / 3))))
             self.kinect.releaseFrame()
 
             k = cv2.waitKey(10)
@@ -25,15 +23,7 @@ class KeyDetector:
                 break
 
     def getKeyContours(self):
-        # img = cv2.imread("lenna.png")
-        # crop_img = img[200:400, 100:300] # Crop from x, y, w, h -> 100, 200, 300, 400
-        # # NOTE: its img[y: y + h, x: x + w] and *not* img[x: x + w, y: y + h]
-        # cv2.imshow("cropped", crop_img)
-        # cv2.waitKey(0)
-
-        # Width: 1920, Height: 1080
-
-        gray = cv2.cvtColor(self.frame, cv2.COLOR_BGR2GRAY)
+        gray = cv2.cvtColor(self.bounded, cv2.COLOR_BGR2GRAY)
         thresh = cv2.threshold(gray, 251, 255, cv2.ADAPTIVE_THRESH_MEAN_C)[1]
         cv2.imshow("Threshold", cv2.resize(thresh, (int(1920 / 3), int(1080 / 3))))
 

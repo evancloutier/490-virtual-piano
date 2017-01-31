@@ -2,9 +2,6 @@ import cv2
 import math
 import numpy as np
 import imutils
-import FrameType
-
-ft = FrameType.FrameType()
 
 class BoundsDetector:
 
@@ -12,22 +9,23 @@ class BoundsDetector:
         self.kinect = kinect
 
         while True:
-            self.frame = self.kinect.getFrame(ft.Color)
+            self.frames = self.kinect.getFrame()
+            self.color = self.frames["color"].asarray()
+
             self.getLargestContour()
 
-            cv2.imshow("Color", cv2.resize(self.frame, (int(1920 / 3), int(1080 / 3))))
+            cv2.imshow("Color", cv2.resize(self.color, (int(1920 / 3), int(1080 / 3))))
             self.kinect.releaseFrame()
 
             k = cv2.waitKey(10)
 
             if k == 27:
-                # Get the ROI bounds
                 self.getROIBounds()
                 cv2.destroyAllWindows()
                 break
 
     def getLargestContour(self):
-        blur = cv2.medianBlur(self.frame, 37)
+        blur = cv2.medianBlur(self.color, 37)
         gray = cv2.cvtColor(blur, cv2.COLOR_BGR2GRAY)
         thresh = cv2.threshold(gray, 251, 255, cv2.ADAPTIVE_THRESH_MEAN_C)[1]
 
@@ -37,7 +35,8 @@ class BoundsDetector:
         contourAreas = [cv2.contourArea(c) for c in cnts]
         sortedAreas = sorted(zip(contourAreas, cnts), key = lambda x: x[0], reverse = True)
 
-        # Find the nth largest contour [n-1][2n-1]
+        # NOTE: Is there a way to improve this?
+        # Find the nth largest contour [n-1][1]
         self.largestContour = sortedAreas[0][1]
 
     def getDistance(self, x1, y1, x2, y2):

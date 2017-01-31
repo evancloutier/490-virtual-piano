@@ -65,7 +65,7 @@ while True:
                        bigdepth=bigdepth,
                        color_depth_map=color_depth_map)
 
-    print(registration.getPointXYZ(undistorted, 960, 540))
+    print(registration.getPointXYZ(undistorted, 300, 300))
 
     cv2.imshow("depth", depth.asarray() / 4500.)
 

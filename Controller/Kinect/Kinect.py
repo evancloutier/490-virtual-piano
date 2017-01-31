@@ -2,9 +2,6 @@ import numpy as np
 import cv2
 import sys
 import platform
-import FrameType
-
-ft = FrameType.FrameType()
 
 system = platform.system()
 
@@ -117,15 +114,10 @@ class Kinect:
     def releaseSemaphore(self):
         self.semaphore.write(chr(semWriting))
 
-    def getFrame(self, frame_type):
+    def getFrame(self):
         if system == 'Darwin':
             self.frames = self.listener.waitForNewFrame()
             return self.frames
-            #
-            # if frame_type == 1:
-            #     return self.frames["color"].asarray()
-            # else:
-            #     return self.frames["depth"].asarray()
         else:
             self.getSemaphore()
             imgBuff = self.readMem(self.rgbSharedMem)
