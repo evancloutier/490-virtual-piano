@@ -93,7 +93,7 @@ class KeyDetector:
                 self.xoffset += 5 * minusBool
             if k == ord('y'):
                 self.yoffset += 5 * minusBool
-            if k == 27:
+            if k == ord('z'):
                 cv2.destroyAllWindows()
                 break
 

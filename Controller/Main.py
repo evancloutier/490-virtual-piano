@@ -8,32 +8,26 @@ class Main:
     def __init__(self):
         self.kinect = Kinect.Kinect()
         self.keyDetector = KeyDetector.KeyDetector(self.kinect)
-        leftLineX, rightLineX, bottomLineY = self.keyDetector.getBounds()
         blurSize = 7
         threshVal = 159
-        self.fingerDetector = FingerDetector.FingerDetector(leftLineX, rightLineX, bottomLineY, blurSize, threshVal, False, self.kinect)
+        self.fingerDetector = FingerDetector.FingerDetector(blurSize, threshVal, False, self.kinect)
 
     def controlLoop(self):
-        #keyCoords = getKeyPositions
+        self.fingerDetector.buildSkinColorHistogram(self.kinect)
+
         while True:
             frame = self.kinect.getFrame(self.kinect.rgbSharedMem)
-            fingerPoints, fingerImage = self.fingerDetector.getFingerPositions(frame)
-
-            #for fingerPoint in fingerPoints:
-                #key = getkeyFromFinger(fingerCoord)
-                #isPressed = getDepthOfKey(key)
-                #if isPressed:
-                    #pressedKeys.append(key)
+            filteredIm = self.fingerDetector.applyHistogram(frame)
+            fingerIm, fingerPoints = self.fingerDetector.getFingerPositions(filteredIm)
 
             k = cv2.waitKey(10)
-
             if k == 27:
                 break
             else:
                 self.fingerDetector.adjustParams(k)
 
-            cv2.imshow('fingers', fingerImage)
-            cv2.imshow('normal', frame)
+            cv2.imshow('filter', filteredIm)
+            cv2.imshow('hand', fingerIm)
 
 
 main = Main()
