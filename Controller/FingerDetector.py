@@ -5,7 +5,6 @@ import math
 import os, sys
 import imutils
 import pdb
-from matplotlib import pyplot as plt
 from skimage.morphology import skeletonize
 
 width = 1920
@@ -60,8 +59,8 @@ class FingerDetector:
 
     #http://www.benmeline.com/finger-tracking-with-opencv-and-python/
     def getSkinSamples(self, frame, sampleRadius=5):
-        sampleWidth = 70
-        sampleHeight = 120
+        sampleWidth = 100
+        sampleHeight = 200
         numSamples = 9
 
         startingWidth = (width - sampleWidth) / 2
@@ -119,7 +118,9 @@ class FingerDetector:
             originalFrame = frame.copy()
             samplePoints = self.getSkinSamples(frame)
 
-            cv2.imshow('skin color', frame)
+            cv2.imshow('skin color', cv2.resize(frame, (int(1920 / 3), int(1080 / 3))))
+            kinect.releaseFrame()
+
             k = cv2.waitKey(10)
             if k == 27:
                 self.hist = self.getHandColors(originalFrame, samplePoints)

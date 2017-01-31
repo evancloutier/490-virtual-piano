@@ -8,26 +8,26 @@ import BoundsDetector
 class Main:
     def __init__(self):
         self.kinect = Kinect.Kinect()
-        # self.boundsDetector = BoundsDetector.BoundsDetector(self.kinect)
-        # self.keyDetector = KeyDetector.KeyDetector(self.kinect, self.boundsDetector.getROIBounds())
         blurSize = 7
         threshVal = 159
+
+        self.boundsDetector = BoundsDetector.BoundsDetector(self.kinect)
+        self.keyDetector = KeyDetector.KeyDetector(self.kinect, self.boundsDetector.getROIBounds())
         self.fingerDetector = FingerDetector.FingerDetector(blurSize, threshVal, False, self.kinect)
+        self.fingerDetector.buildSkinColorHistogram(self.kinect)
 
     def controlLoop(self):
-        self.fingerDetector.buildSkinColorHistogram(self.kinect)
 
         while True:
             frame = self.kinect.getFrame()
             color = frame["color"]
             depth = frame["depth"]
-            # colorArray = color.asarray()
-            # depthArray = depth.asarray()
+            colorArray = color.asarray()
+            depthArray = depth.asarray()
 
-            # filteredIm = self.fingerDetector.applyHistogram(colorArray)
-            # fingerIm, fingerPoints = self.fingerDetector.getFingerPositions(filteredIm)
+            filteredIm = self.fingerDetector.applyHistogram(colorArray)
+            fingerIm, fingerPoints = self.fingerDetector.getFingerPositions(filteredIm)
 
-            #
             # bounds = self.boundsDetector.getROIBounds()
             # boundedColor = colorArray[bounds[1]: bounds[3], bounds[0]: bounds[2]]
             # boundedDepth = depthArray[bounds[1]: bounds[3], bounds[0]: bounds[2]]
@@ -41,28 +41,30 @@ class Main:
             # cv2.imshow("Bounded Depth", boundedDepth / 4500.)
             #
 
-            self.kinect.registration.apply(color, depth, self.kinect.undistorted, self.kinect.registered, None, None)
-
-            cv2.circle(self.kinect.registered.asarray(np.uint8), (300, 300), 7, (255, 0, 0), -1)
-            cv2.circle(depth.asarray(), (300, 300), 7, (255, 0, 0), -1)
-            (x, y, z) = self.kinect.registration.getPointXYZ(self.kinect.undistorted, 300, 300)
-            print "X: {0}, Y: {1}, Z: {2}".format(x, y, z)
-
-            cv2.imshow("Depth", depth.asarray() / 4500.)
-            cv2.imshow("Registered", self.kinect.registered.asarray(np.uint8))
-
+            # self.kinect.registration.apply(color, depth, self.kinect.undistorted, self.kinect.registered, None, None)
+            #
+            # cv2.circle(self.kinect.registered.asarray(np.uint8), (300, 300), 7, (255, 0, 0), -1)
+            # cv2.circle(depth.asarray(), (300, 300), 7, (255, 0, 0), -1)
+            # (x, y, z) = self.kinect.registration.getPointXYZ(self.kinect.undistorted, 300, 300)
+            # print "X: {0}, Y: {1}, Z: {2}".format(x, y, z)
+            #
+            # cv2.imshow("Depth", depth.asarray() / 4500.)
+            # cv2.imshow("Registered", self.kinect.registered.asarray(np.uint8))
+            #
 
             # bounds = self.boundsDetector.getROIBounds()
-#
+
             # numpy slicing to get our ROI
             # boundedImage = frame[bounds[1]: bounds[3], bounds[0]: bounds[2]]
 
             # cv2.imshow("Stream", boundedImage)
             # cv2.imshow("Stream", cv2.resize(boundedImage, (int(1920 / 3), int(1080 / 3))))
-            cv2.imshow('filter', filteredIm)
-            cv2.imshow('hand', fingerIm)
+            cv2.imshow('filter', cv2.resize(filteredIm, (int(1920 / 3), int(1080 / 3))))
+            cv2.imshow('hand', cv2.resize(fingerIm, (int(1920 / 3), int(1080 / 3))))
 
             self.kinect.releaseFrame()
+
+            k = cv2.waitKey(10)
 
             if k == 27:
                 cv2.destroyAllWindows()
