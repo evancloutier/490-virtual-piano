@@ -1,4 +1,5 @@
 import cv2
+import numpy as np
 import Kinect.Kinect as Kinect
 import FingerDetector
 import KeyDetector
@@ -11,22 +12,38 @@ class Main:
     def __init__(self):
         self.kinect = Kinect.Kinect()
         # self.keyDetector = KeyDetector.KeyDetector(self.kinect)
-        self.boundsDetector = BoundsDetector.BoundsDetector(self.kinect)
+        # self.boundsDetector = BoundsDetector.BoundsDetector(self.kinect)
 
     def controlLoop(self):
         while True:
-            frame = self.kinect.getFrame(ft.Color)
-            bounds = self.boundsDetector.getROIBounds()
+            # color = self.kinect.getFrame(ft.Color)
+            frame = self.kinect.getFrame(ft.Depth)
+            color = frame["color"]
+            depth = frame["depth"]
 
+            self.kinect.registration.apply(color, depth, self.kinect.undistorted,
+                                            self.kinect.registered, None,
+                                            None)
+
+            print (self.kinect.registration.getPointXYZ(self.kinect.undistorted, 960, 540))
+
+            cv2.imshow("Depth", frame["depth"].asarray() / 4500.)
+            cv2.imshow("Registered", self.kinect.registered.asarray(np.uint8))
+            # cv2.imshow("Color", cv2.resize(color, (int(1920 / 3), int(1080 / 3))))
+            # cv2.imshow("Registered", registered)
+
+
+            # bounds = self.boundsDetector.getROIBounds()
+#
             # numpy slicing to get our ROI
-            boundedImage = frame[bounds[1]: bounds[3], bounds[0]: bounds[2]]
+            # boundedImage = frame[bounds[1]: bounds[3], bounds[0]: bounds[2]]
 
             # for contour in self.keyDetector.contours:
             #     c = contour[0]
             #     cv2.drawContours(frame, [c], -1, (0, 0, 0), 5)
             #     cv2.circle(frame, (contour[1], contour[2]), 7, (0, 0, 0), -1)
 
-            cv2.imshow("Stream", boundedImage)
+            # cv2.imshow("Stream", boundedImage)
             # cv2.imshow("Stream", cv2.resize(boundedImage, (int(1920 / 3), int(1080 / 3))))
             self.kinect.releaseFrame()
 

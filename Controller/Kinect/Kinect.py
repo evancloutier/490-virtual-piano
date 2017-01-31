@@ -62,13 +62,18 @@ class Kinect:
             self.device = self.fn.openDevice(self.serial, pipeline = self.pipeline)
 
             # Initialize listener
-            self.listener = SyncMultiFrameListener(FrameType.Color | FrameType.Ir | FrameType.Depth)
-
+            self.listener = SyncMultiFrameListener(FrameType.Color | FrameType.Depth)
 
             # Register listener
             self.device.setColorFrameListener(self.listener)
             self.device.setIrAndDepthFrameListener(self.listener)
             self.device.start()
+
+            self.registration = Registration(self.device.getIrCameraParams(),
+                                             self.device.getColorCameraParams())
+
+            self.undistorted = Frame(512, 424, 4)
+            self.registered = Frame(512, 424, 4)
 
             # Retrieve and release the first frame for initialization
             self.frames = self.listener.waitForNewFrame()
@@ -115,11 +120,12 @@ class Kinect:
     def getFrame(self, frame_type):
         if system == 'Darwin':
             self.frames = self.listener.waitForNewFrame()
-
-            if frame_type == 1:
-                return self.frames["color"].asarray()
-            else:
-                return self.frames["depth"].asarray()
+            return self.frames
+            #
+            # if frame_type == 1:
+            #     return self.frames["color"].asarray()
+            # else:
+            #     return self.frames["depth"].asarray()
         else:
             self.getSemaphore()
             imgBuff = self.readMem(self.rgbSharedMem)
