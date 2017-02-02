@@ -12,9 +12,11 @@ class Main:
         threshVal = 159
 
         self.boundsDetector = BoundsDetector.BoundsDetector(self.kinect)
-        self.keyDetector = KeyDetector.KeyDetector(self.kinect, self.boundsDetector.getROIBounds())
+        self.keyDetector = KeyDetector.KeyDetector(self.kinect)
         self.fingerDetector = FingerDetector.FingerDetector(blurSize, threshVal, False, self.kinect)
         self.fingerDetector.buildSkinColorHistogram(self.kinect)
+        self.kinect.bounds = self.boundsDetector.getROIBounds()
+
 
     def controlLoop(self):
 
@@ -22,10 +24,8 @@ class Main:
             frame = self.kinect.getFrame()
             color = frame["color"]
             depth = frame["depth"]
-            colorArray = color.asarray()
-            depthArray = depth.asarray()
 
-            filteredIm = self.fingerDetector.applyHistogram(colorArray)
+            filteredIm = self.fingerDetector.applyHistogram(color)
             fingerIm, fingerPoints = self.fingerDetector.getFingerPositions(filteredIm)
 
             # bounds = self.boundsDetector.getROIBounds()

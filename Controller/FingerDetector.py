@@ -113,8 +113,7 @@ class FingerDetector:
     def buildSkinColorHistogram(self, kinect):
         handHistogram = None
         while True:
-            frame = kinect.getFrame()["color"].asarray()
-            # frame = kinect.getFrame(kinect.rgbSharedMem)
+            frame = kinect.getFrame()["color"]
             originalFrame = frame.copy()
             samplePoints = self.getSkinSamples(frame)
 
@@ -137,6 +136,7 @@ class FingerDetector:
         hand = self.getLargestShapes(filteredIm)[0]
         filteredIm = self.drawShape(blackImgCopy, hand)
         self.hand = hand
+
         return blackImgCopy
 
     def getFarPoint(self, cnt, centerOfHand):
@@ -225,7 +225,7 @@ class FingerDetector:
         print "Hit esc to exit background mode"
         cv2.ocl.setUseOpenCL(False)
         while True:
-                frame = kinect.getFrame()["color"].asarray()
+                frame = kinect.getFrame()["color"]
                 fgmask = self.background.apply(frame)
                 cv2.imshow('Foreground', fgmask)
                 cv2.imshow('Original', frame)
