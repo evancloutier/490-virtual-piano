@@ -129,7 +129,6 @@ class Kinect:
         depth = self.frames["depth"].asarray()
 
         if self.bounds is not None and len(self.bounds) == 4:
-            print self.bounds
             color = color[self.bounds[1]: self.bounds[3], self.bounds[0]: self.bounds[2]]
 
         arrayMap["color"] = color

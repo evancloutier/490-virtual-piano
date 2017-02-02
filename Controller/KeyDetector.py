@@ -7,13 +7,14 @@ class KeyDetector:
 
     def __init__(self, kinect):
         self.kinect = kinect
+        self.lowerThresh = 225
+        self.upperThresh = 255
 
         while True:
             self.frames = self.kinect.getFrame()
             color = self.frames["color"]
             self.bounded = color
-            #self.getKeyContours()
-            #cv2.imshow("Color", color)
+            self.getKeyContours()
             cv2.imshow("Color", cv2.resize(self.bounded, (int(1920 / 3), int(1080 / 3))))
             self.kinect.releaseFrame()
 
@@ -22,11 +23,27 @@ class KeyDetector:
             if k == 27:
                 cv2.destroyAllWindows()
                 break
-
+            elif k == ord('q'):
+                if self.lowerThresh > 0:
+                    self.lowerThresh -= 1
+                    print "lowerThresh", self.lowerThresh
+            elif k == ord('w'):
+                if self.lowerThresh < 255:
+                    self.lowerThresh += 1
+                    print "lowerThresh", self.lowerThresh
+            elif k == ord('a'):
+                if self.upperThresh > 0:
+                    self.upperThresh -= 1
+                    print "upperThresh", self.upperThresh
+            elif k == ord('s'):
+                if self.upperThresh < 255:
+                    self.upperThresh += 1
+                    print "upperThresh", self.upperThresh
+                    
     def getKeyContours(self):
         gray = cv2.cvtColor(self.bounded, cv2.COLOR_BGR2GRAY)
-        thresh = cv2.threshold(gray, 251, 255, cv2.ADAPTIVE_THRESH_MEAN_C)[1]
-        #cv2.imshow("Threshold", cv2.resize(thresh, (int(1920 / 3), int(1080 / 3))))
+        thresh = cv2.threshold(gray, self.lowerThresh, self.upperThresh, cv2.ADAPTIVE_THRESH_MEAN_C)[1]
+        cv2.imshow("Threshold", cv2.resize(thresh, (int(1920 / 3), int(1080 / 3))))
 
         cnts = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         cnts = cnts[0] if imutils.is_cv2() else cnts[1]

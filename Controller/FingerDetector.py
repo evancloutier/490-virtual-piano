@@ -6,6 +6,7 @@ import os, sys
 import imutils
 import pdb
 from skimage.morphology import skeletonize
+from matplotlib import pyplot as plt
 
 width = 1920
 height = 1080
@@ -83,7 +84,6 @@ class FingerDetector:
             currRow = sample / numRows
             currCol = sample % numCols
 
-
             currHeight = startingHeight + (currRow * rowHeight)
             currWidth = startingWidth + (currCol * colWidth)
 
@@ -98,14 +98,18 @@ class FingerDetector:
         hsv = cv2.cvtColor(frame, cv2.COLOR_RGB2HSV)
         mask = np.zeros(frame.shape[:2], np.uint8)
 
+        idx = 0
         for x,y in samplePoints:
             for xIdx in range(x - sampleRadius, x + sampleRadius):
                 for yIdx in range(y - sampleRadius, y + sampleRadius):
                     mask[yIdx][xIdx] = 255
+            idx += 1
         maskedImage = cv2.bitwise_and(frame, frame, mask=mask)
 
-
+        color = ('b','g','r')
         hist = cv2.calcHist([hsv], [0], mask, [256], [0,256])
+        hist = cv2.normalize(hist, hist, 0, 255, cv2.NORM_MINMAX)
+
         hist = cv2.normalize(hist, hist, 0, 255, cv2.NORM_MINMAX)
 
         return hist
@@ -128,16 +132,18 @@ class FingerDetector:
 
     def applyHistogram(self, frame):
         frame = frame.copy()
-        blackImgCopy = blackImg.copy()
+        blackImgCopy = self.getBackgroundCopy(len(frame), len(frame[0]))
         hsv = cv2.cvtColor(frame, cv2.COLOR_RGB2HSV)
         filteredIm = cv2.calcBackProject([hsv], [0], self.hist, [0,180,0,256], 1)
+
+        cpy = filteredIm.copy()
 
         filteredIm = self.blurFrame(filteredIm, self.blurPixelSize)
         hand = self.getLargestShapes(filteredIm)[0]
         filteredIm = self.drawShape(blackImgCopy, hand)
         self.hand = hand
 
-        return blackImgCopy
+        return (blackImgCopy, cpy)
 
     def getFarPoint(self, cnt, centerOfHand):
         maxDist = self.distanceBetweenPoints(cnt[0][0], centerOfHand)
@@ -167,19 +173,17 @@ class FingerDetector:
             return None
         return farPoint
 
-    def getFingerPositions(self, binaryIm, frame=None):
-        if frame is None:
-            frame = self.getFrame()
-
+    def getFingerPositions(self, binaryIm):
         centerOfHand = self.getCenterOfHand(self.hand)
-        binaryIm = self.skeletonizeHand(binaryIm, centerOfHand, frame)
+        binaryIm = self.skeletonizeHand(binaryIm, centerOfHand)
+
+        a = binaryIm.copy()
 
         blackImgCopy = blackImg.copy()
 
         otsuRet, otsuThresh = cv2.threshold(binaryIm, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
         cnts = cv2.findContours(otsuThresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         cnts = cnts[0] if imutils.is_cv2() else cnts[1]
-
 
         farPoints = []
         for cnt in cnts:
@@ -192,18 +196,18 @@ class FingerDetector:
         for point in farPoints:
             cv2.circle(blackImgCopy, (point[0], point[1]), 4, color=(0,255,0), thickness=3)
 
-        return (blackImgCopy, farPoints)
+        return (a, farPoints)
+        #return (blackImgCopy, farPoints)
 
 
     #http://opencvpython.blogspot.ca/2012/05/skeletonization-using-opencv-python.html
     #getFingerPositions
-    def skeletonizeHand(self, binaryIm, centerOfHand, frame):
+    def skeletonizeHand(self, binaryIm, centerOfHand):
         binaryIm = cv2.cvtColor(binaryIm, cv2.COLOR_RGB2GRAY)
         binaryImCopy = binaryIm.copy()
 
         binaryIm[binaryIm == 255] = 1
         skeleton = skeletonize(binaryIm)
-
 
         binaryIm[skeleton == 1] = 255
 
@@ -234,8 +238,9 @@ class FingerDetector:
                     break
 
 
-    def getBackgroundCopy(self):
-        return blackImg.copy()
+    def getBackgroundCopy(self, height, width):
+        img = np.zeros((height,width,3), np.uint8)
+        return img
 
 
     '''bluring / thresholding functions'''
@@ -418,7 +423,7 @@ class FingerDetector:
             handWidth = 0
             centerX = centerOfHand[0]
             centerY = centerOfHand[1]
-            for i in range(centerX, width):
+            for i in range(centerX, len(frame)):
                 if frame[centerY][i] == 255:#set([255, 255, 255]):
                     handWidth += 1
             for i in range(centerX, 0, -1):

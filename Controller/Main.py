@@ -11,11 +11,15 @@ class Main:
         blurSize = 7
         threshVal = 159
 
-        self.boundsDetector = BoundsDetector.BoundsDetector(self.kinect)
-        self.keyDetector = KeyDetector.KeyDetector(self.kinect)
         self.fingerDetector = FingerDetector.FingerDetector(blurSize, threshVal, False, self.kinect)
         self.fingerDetector.buildSkinColorHistogram(self.kinect)
+
+
+        self.boundsDetector = BoundsDetector.BoundsDetector(self.kinect)
+
         self.kinect.bounds = self.boundsDetector.getROIBounds()
+
+        self.keyDetector = KeyDetector.KeyDetector(self.kinect)
 
 
     def controlLoop(self):
@@ -25,17 +29,17 @@ class Main:
             color = frame["color"]
             depth = frame["depth"]
 
-            filteredIm = self.fingerDetector.applyHistogram(color)
+            filteredIm, cpy = self.fingerDetector.applyHistogram(color)
             fingerIm, fingerPoints = self.fingerDetector.getFingerPositions(filteredIm)
 
             # bounds = self.boundsDetector.getROIBounds()
             # boundedColor = colorArray[bounds[1]: bounds[3], bounds[0]: bounds[2]]
             # boundedDepth = depthArray[bounds[1]: bounds[3], bounds[0]: bounds[2]]
             #
-            # for contour in self.keyDetector.contours:
-            #     c = contour[0]
-            #     cv2.drawContours(boundedColor, [c], -1, (0, 0, 0), 2)
-            #     cv2.circle(boundedColor, (contour[1], contour[2]), 4, (0, 0, 0), -1)
+            for contour in self.keyDetector.contours:
+                c = contour[0]
+                cv2.drawContours(color, [c], -1, (0, 0, 0), 2)
+                cv2.circle(color, (contour[1], contour[2]), 4, (0, 0, 0), -1)
             #
             # cv2.imshow("Bounded Color", cv2.resize(boundedColor, (int(1920 / 3), int(1080 / 3))))
             # cv2.imshow("Bounded Depth", boundedDepth / 4500.)
@@ -59,7 +63,9 @@ class Main:
 
             # cv2.imshow("Stream", boundedImage)
             # cv2.imshow("Stream", cv2.resize(boundedImage, (int(1920 / 3), int(1080 / 3))))
-            cv2.imshow('filter', cv2.resize(filteredIm, (int(1920 / 3), int(1080 / 3))))
+            cv2.imshow('raw im', cv2.resize(color, (int(1920 / 3), int(1080 / 3))))
+
+            cv2.imshow('filter', cv2.resize(cpy, (int(1920 / 3), int(1080 / 3))))
             cv2.imshow('hand', cv2.resize(fingerIm, (int(1920 / 3), int(1080 / 3))))
 
             self.kinect.releaseFrame()
