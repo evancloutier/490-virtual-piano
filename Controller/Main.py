@@ -4,18 +4,20 @@ import Kinect.Kinect as Kinect
 import FingerDetector
 import KeyDetector
 import BoundsDetector
+import DepthProcessor
 
 class Main:
     def __init__(self):
         self.kinect = Kinect.Kinect()
-        blurSize = 7
-        threshVal = 159
-
-        self.boundsDetector = BoundsDetector.BoundsDetector(self.kinect)
-        self.keyDetector = KeyDetector.KeyDetector(self.kinect)
-        self.fingerDetector = FingerDetector.FingerDetector(blurSize, threshVal, False, self.kinect)
-        self.fingerDetector.buildSkinColorHistogram(self.kinect)
-        self.kinect.bounds = self.boundsDetector.getROIBounds()
+        self.depthProcessor = DepthProcessor.DepthProcessor(self.kinect)
+        # blurSize = 7
+        # threshVal = 159
+        #
+        # self.boundsDetector = BoundsDetector.BoundsDetector(self.kinect)
+        # self.keyDetector = KeyDetector.KeyDetector(self.kinect)
+        # self.fingerDetector = FingerDetector.FingerDetector(blurSize, threshVal, False, self.kinect)
+        # self.fingerDetector.buildSkinColorHistogram(self.kinect)
+        # self.kinect.bounds = self.boundsDetector.getROIBounds()
 
 
     def controlLoop(self):
