@@ -9,41 +9,35 @@ class DepthProcessor:
     def __init__(self, kinect):
         self.kinect = kinect
 
-        # Grab a single frame
-        self.frames = self.kinect.getFrame()
-        depth = self.frames["depth"]
-
-        # Set the depth value to be in metres (between 0-1)
+    def processDepthFrame(self, depth):
         row, col = depth.shape
-        reg = np.zeros((row, col))
-        reg.fill(1000)
-        newDepth = depth / reg
 
-        # Normalize the values within the numpy array
-        for index, x in np.ndenumerate(newDepth):
+        # Create array to normalize depth values
+        norm = np.zeros((row, col))
+        norm.fill(1000)
+        normDepth = depth / norm
+
+        # Apply grayscale value to array
+        for index, x in np.ndenumerate(normDepth):
             if math.isnan(x):
                 continue
             else:
-                updated = self.normalizeDepthValue(1, 0, x)
-                newDepth.itemset(index, updated)
+                updated = self.getGrayscaleValue(1, 0, x)
+                normDepth.itemset(index, updated)
 
-        # Create a copy of the array with data type np.uint8
-        normDepth = newDepth.astype(np.uint8, copy = True)
+        # Cast to np.uint8
+        grayDepth = normDepth.astype(np.uint8, copy = True)
 
-        # Convert the depth to RGB
-        depthColor = cv2.cvtColor(normDepth, cv2.COLOR_GRAY2RGB)
-        colorMap = cv2.applyColorMap(depthColor, cv2.COLORMAP_WINTER)
+        # Convert grayscale value to RGB
+        colorDepth = cv2.cvtColor(grayDepth, cv2.COLOR_GRAY2RGB)
 
-        while True:
-            cv2.imshow("Depth", depth / 4500.)
-            cv2.imshow("Depth Color Map", colorMap)
+        # Apply color map to RGB array
+        colorMap = cv2.applyColorMap(colorDepth, cv2.COLORMAP_WINTER)
 
-            k = cv2.waitKey(10)
+        # Return it to display
+        return colorMap
 
-            if k == 27:
-                break
-
-    def normalizeDepthValue(self, highBound, lowBound, value):
+    def getGrayscaleValue(self, highBound, lowBound, value):
         if math.isnan(value):
             return 0
         else:
