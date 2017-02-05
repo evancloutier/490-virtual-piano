@@ -76,4 +76,4 @@ class Main:
                 self.fingerDetector.adjustParams(k)
 
 main = Main()
-main.controlLoop()
+# main.controlLoop()
