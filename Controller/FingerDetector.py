@@ -5,8 +5,9 @@ import math
 import os, sys
 import imutils
 import pdb
+from collections import OrderedDict
+from operator import itemgetter
 from skimage.morphology import skeletonize
-from matplotlib import pyplot as plt
 
 width = 1920
 height = 1080
@@ -136,14 +137,14 @@ class FingerDetector:
         hsv = cv2.cvtColor(frame, cv2.COLOR_RGB2HSV)
         filteredIm = cv2.calcBackProject([hsv], [0], self.hist, [0,180,0,256], 1)
 
-        cpy = filteredIm.copy()
+        backProject = filteredIm.copy()
 
         filteredIm = self.blurFrame(filteredIm, self.blurPixelSize)
         hand = self.getLargestShapes(filteredIm)[0]
         filteredIm = self.drawShape(blackImgCopy, hand)
         self.hand = hand
 
-        return (blackImgCopy, cpy)
+        return (blackImgCopy, backProject)
 
     def getFarPoint(self, cnt, centerOfHand):
         maxDist = self.distanceBetweenPoints(cnt[0][0], centerOfHand)
@@ -173,39 +174,92 @@ class FingerDetector:
             return None
         return farPoint
 
-    def getFingerPositions(self, binaryIm):
+
+    def findLargestInscribedRectangle(self, binaryIm):
+        sumMatrix = np.zeros((len(binaryIm), len(binaryIm[0])), np.uint8)
+        sumMatrix[0] = np.asarray(binaryIm[0][:].copy())
+        for y in xrange(len(binaryIm)):
+            sumMatrix.itemset((y, 0), binaryIm.item(y, 0))
+
+        maxVal = 0
+        maxCoords = [0,0]
+
+        for y in xrange(len(binaryIm)):
+            for x in xrange(len(binaryIm)):
+                if y == 0 or x == 0:
+                    val = sumMatrix.item(y,x)
+                    if val > maxVal:
+                        maxVal = val
+                        maxCoords = [x,y]
+                else:
+                    val = binaryIm.item(y,x)
+                    if val == 1:
+                        adjVal = min(sumMatrix.item(y,x - 1), sumMatrix.item(y - 1,x), sumMatrix.item(y - 1,x - 1)) + 1
+                        sumMatrix.itemset((y,x), adjVal)
+                        if adjVal > maxVal:
+                            maxVal = adjVal
+                            maxCoords = [x,y]
+
+        x,y = maxCoords
+
+        return (x,y,maxVal)
+
+    def getTips(self, blackImgCopy, cnts, centerOfHand):
+        farPoints = dict()
+        for idx, cnt in enumerate(cnts):
+            farPoint = self.getExtremePoints(cnt, centerOfHand)
+            if farPoint is not None:
+                farPoints[idx] = farPoint
+
+            cv2.drawContours(blackImgCopy, [cnt], -1, (255, 255, 255), thickness=-1)
+
+        '''if len(farPoints) == 4:
+            longestContour = len(cnts[0])
+            for idx in range(len(cnts)):
+                if len(cnts[idx]) > longestContour:
+                    longestContour = cnts[idx]
+
+            nextFarthest = self.getExtremePoints(longestContour, )'''
+
+
+        for idx in farPoints:
+            cv2.circle(blackImgCopy, (farPoints[idx][0], farPoints[idx][1]), 4, color=(0,255,0), thickness=3)
+        return farPoints
+
+    def convertToBinary(self, binaryIm):
+        binaryImCopy = binaryIm.copy()
+        binaryImCopy[binaryImCopy == 255] = 1
+        return binaryImCopy
+
+    def getFingerPositions(self, image):
+        grayIm = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
+        binaryIm = self.convertToBinary(grayIm)
+        grayIm = self.skeletonizeHand(grayIm)
+
+        #x,y,maxVal = self.findLargestInscribedRectangle(binaryIm)
+
         centerOfHand = self.getCenterOfHand(self.hand)
-        binaryIm = self.skeletonizeHand(binaryIm, centerOfHand)
 
-        a = binaryIm.copy()
 
-        blackImgCopy = blackImg.copy()
+        self.removeCenterOfHand(binaryIm, grayIm, centerOfHand)
+        #cv2.rectangle(grayIm, (x,y), (x - maxVal, y - maxVal), color=0, thickness=-1)
+        #cv2.rectangle(binaryIm, (x,y), (x - maxVal, y - maxVal), color=0, thickness=-1)
 
-        otsuRet, otsuThresh = cv2.threshold(binaryIm, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+
+        blackImgCopy = self.getBackgroundCopy(len(binaryIm), len(binaryIm[0]))
+
+        otsuRet, otsuThresh = cv2.threshold(grayIm, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
         cnts = cv2.findContours(otsuThresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         cnts = cnts[0] if imutils.is_cv2() else cnts[1]
 
-        farPoints = []
-        for cnt in cnts:
-            farPoint = self.getExtremePoints(cnt, centerOfHand)
-            if farPoint is not None:
-                farPoints.append(farPoint)
-            cv2.drawContours(blackImgCopy, [cnt], -1, (255, 255, 255), 2)
+        fingerPoints = self.getTips(blackImgCopy, cnts, centerOfHand)
 
 
-        for point in farPoints:
-            cv2.circle(blackImgCopy, (point[0], point[1]), 4, color=(0,255,0), thickness=3)
-
-        return (a, farPoints)
-        #return (blackImgCopy, farPoints)
-
+        return (blackImgCopy, fingerPoints)
 
     #http://opencvpython.blogspot.ca/2012/05/skeletonization-using-opencv-python.html
     #getFingerPositions
-    def skeletonizeHand(self, binaryIm, centerOfHand):
-        binaryIm = cv2.cvtColor(binaryIm, cv2.COLOR_RGB2GRAY)
-        binaryImCopy = binaryIm.copy()
-
+    def skeletonizeHand(self, binaryIm):
         binaryIm[binaryIm == 255] = 1
         skeleton = skeletonize(binaryIm)
 
@@ -213,8 +267,6 @@ class FingerDetector:
 
         kernel = np.ones((5, 5))
         binaryIm = cv2.dilate(binaryIm, kernel, iterations=1)
-
-        self.removeCenterOfHand(binaryImCopy, binaryIm, centerOfHand, self.hand)
 
         return binaryIm
 
@@ -418,16 +470,16 @@ class FingerDetector:
         #cv2.ellipse(frame, box, color=(0,0,0), thickness=-1)
         cv2.ellipse(frame, (center[0],center[1]), (width, width/2), 0, 0, 180, (0,0,0), 2)
 
-    def removeCenterOfHand(self, frame, frameToDraw, centerOfHand, contour):
-        if centerOfHand is not None and contour is not None:
+    def removeCenterOfHand(self, frame, frameToDraw, centerOfHand):
+        if centerOfHand is not None:
             handWidth = 0
             centerX = centerOfHand[0]
             centerY = centerOfHand[1]
             for i in range(centerX, len(frame)):
-                if frame[centerY][i] == 255:#set([255, 255, 255]):
+                if frame[centerY][i] == 1:#set([255, 255, 255]):
                     handWidth += 1
             for i in range(centerX, 0, -1):
-                if frame[centerY][i] == 255:#set([255,255,255]):
+                if frame[centerY][i] == 1:#set([255,255,255]):
                     if abs(centerX - i) > handWidth:
                         handWidth += 1
             handWidth += 1

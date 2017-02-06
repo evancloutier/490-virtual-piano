@@ -11,7 +11,7 @@ class BoundsDetector:
 
     def __init__(self, kinect):
         self.kinect = kinect
-        self.lowerThresh = 225
+        self.lowerThresh = 200
         self.upperThresh = 255
 
         while True:
@@ -89,4 +89,4 @@ class BoundsDetector:
 
     def getROIBounds(self):
         x, y, w, h = cv2.boundingRect(self.largestContour)
-        return self.getROIPoints(x, y, x + w, y + h, 0.75)
+        return self.getROIPoints(x, y, x + w, y + h, 0.5)

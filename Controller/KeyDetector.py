@@ -5,16 +5,18 @@ import pdb
 
 class KeyDetector:
 
-    def __init__(self, kinect):
+    def __init__(self, kinect, firstNote):
         self.kinect = kinect
-        self.lowerThresh = 225
+        self.lowerThresh = 200
         self.upperThresh = 255
+        self.keys = dict()
 
         while True:
             self.frames = self.kinect.getFrame()
             color = self.frames["color"]
             self.bounded = color
             self.getKeyContours()
+            self.assignContourToKey(firstNote)
             cv2.imshow("Color", cv2.resize(self.bounded, (int(1920 / 3), int(1080 / 3))))
             self.kinect.releaseFrame()
 
@@ -39,7 +41,22 @@ class KeyDetector:
                 if self.upperThresh < 255:
                     self.upperThresh += 1
                     print "upperThresh", self.upperThresh
-                    
+
+    def assignContourToKey(self, firstNote):
+        #sorted from left to right from player perspective
+        noteNames = ["C","Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B"]
+        noteIdx = noteNames.index(firstNote)
+
+        for idx, contour in enumerate(self.contours):
+            noteName = noteNames[noteIdx]
+            noteOctave = idx / len(noteNames) + 1
+            noteName += str(noteOctave)
+            self.keys[noteName] = contour[:]
+
+            noteIdx = (noteIdx + 1) % len(noteNames)
+
+
+
     def getKeyContours(self):
         gray = cv2.cvtColor(self.bounded, cv2.COLOR_BGR2GRAY)
         thresh = cv2.threshold(gray, self.lowerThresh, self.upperThresh, cv2.ADAPTIVE_THRESH_MEAN_C)[1]
@@ -66,3 +83,13 @@ class KeyDetector:
                 contours.append(contour)
         contours.sort(key = lambda x: x[1])
         self.contours = contours
+
+
+
+
+
+    def drawKeys(self, image):
+        cv2.drawContours(image, self.keys["E1"], 0, color=255, thickness=5)
+
+        #for cont in self.contours:
+        #    cv2.drawContours(image, cont, 0, color=255, thickness=5)
