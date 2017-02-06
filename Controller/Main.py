@@ -4,6 +4,7 @@ import Kinect.Kinect as Kinect
 import FingerDetector
 import KeyDetector
 import BoundsDetector
+import DepthProcessor
 
 class Main:
     def __init__(self):
@@ -11,17 +12,19 @@ class Main:
         blurSize = 7
         threshVal = 159
 
+
         self.fingerDetector = FingerDetector.FingerDetector(blurSize, threshVal, False, self.kinect)
         self.fingerDetector.buildSkinColorHistogram(self.kinect)
         self.boundsDetector = BoundsDetector.BoundsDetector(self.kinect)
         self.kinect.bounds = self.boundsDetector.getROIBounds()
         self.keyDetector = KeyDetector.KeyDetector(self.kinect, "C")
-
+        self.depthProcessor = DepthProcessor.DepthProcessor(self.kinect)
 
     def controlLoop(self):
 
         while True:
             frame = self.kinect.getFrame()
+
             color = frame["color"]
             depth = frame["depth"]
 
@@ -45,6 +48,7 @@ class Main:
             # cv2.imshow("Bounded Color", cv2.resize(boundedColor, (int(1920 / 3), int(1080 / 3))))
             # cv2.imshow("Bounded Depth", boundedDepth / 4500.)
             #
+            # depthColor = self.depthProcessor.processDepthFrame(depth)
 
             # self.kinect.registration.apply(color, depth, self.kinect.undistorted, self.kinect.registered, None, None)
             #

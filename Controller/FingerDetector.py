@@ -91,7 +91,6 @@ class FingerDetector:
             self.drawCenterOfHand(frame, (currWidth, currHeight), color=(0,255,0))
             sampleCenters.append([currWidth, currHeight])
 
-
         return sampleCenters
 
     def getHandColors(self, frame, samplePoints, sampleRadius=5):

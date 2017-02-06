@@ -84,10 +84,6 @@ class KeyDetector:
         contours.sort(key = lambda x: x[1])
         self.contours = contours
 
-
-
-
-
     def drawKeys(self, image):
         cv2.drawContours(image, self.keys["E1"], 0, color=255, thickness=5)
 

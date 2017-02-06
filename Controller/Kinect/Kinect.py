@@ -79,73 +79,37 @@ class Kinect:
         self.listener.release(self.frames)
 
         self.bounds = None
-        '''else:
-            self.semaphoreKey = self.getSemaphoreKey()
-            self.semaphore = self.getSharedMemByKey(self.semaphoreKey)
-            self.rgbKey, self.depthKey = self.getSharedMemKeys()
-            self.rgbSharedMem = self.getSharedMemByKey(self.rgbKey)
-        '''
+        self.depthBounds = None
 
-    def getSharedMemKeys(self):
-        keyFiles = open(sharedMemKeyLoc)
-        rgbKey = 0
-        depthKey = 0
-        for idx, line in enumerate(keyFiles.readlines()):
-            if idx == 0:
-                rgbKey = int(line)
-            elif idx == 1:
-                depthKey = int(line)
-        return [rgbKey, depthKey]
+    def setDepthBounds(self):
+        if self.depthBounds is None:
+            (x1, y1, x2, y2) = self.bounds
 
-    def getSemaphoreKey(self):
-        semFile = open(semaphoreKeyLoc)
-        semKey = int(semFile.readlines()[0])
-        return semKey
+            # Need to scale the points to fit within the depth frame
+            dY1 = int((float(424) / float(1080)) * float(y1))
+            dX1 = int((float(512) / float(1920)) * float(x1))
+            dY2 = int((float(424) / float(1080)) * float(y2))
+            dX2 = int((float(512) / float(1920)) * float(x2))
 
-    def getSharedMemByKey(self, key):
-        mem = sysv_ipc.SharedMemory(key)
-        return mem
-
-    def readMem(self, sharedMem):
-        memVal = sharedMem.read()
-        return memVal
-
-    def getSemaphore(self):
-        while True:
-            semVal = bytearray(self.readMem(self.semaphore))[0]
-            if semVal == semReading:
-                return
-
-    def releaseSemaphore(self):
-        self.semaphore.write(chr(semWriting))
+            self.depthBounds = (dX1, dY1, dX2, dY2)
 
     def getFrame(self):
-        #if system == 'Darwin':
         self.frames = self.listener.waitForNewFrame()
 
-        #self.frames["depth"] = self.frames["depth"].asarray()
         arrayMap = dict()
         color = self.frames["color"].asarray()
         depth = self.frames["depth"].asarray()
 
         if self.bounds is not None and len(self.bounds) == 4:
+            if self.depthBounds is None:
+                self.setDepthBounds()
             color = color[self.bounds[1]: self.bounds[3], self.bounds[0]: self.bounds[2]]
+            depth = depth[self.depthBounds[1]: self.depthBounds[3], self.depthBounds[0]: self.depthBounds[2]]
 
         arrayMap["color"] = color
         arrayMap["depth"] = depth
 
         return arrayMap
-        '''else:
-            self.getSemaphore()
-            imgBuff = self.readMem(self.rgbSharedMem)
-            self.releaseSemaphore()
-
-            # We will need to account for the depth at a later point
-            pilImage = Image.frombytes("RGB", (width, height), imgBuff)
-            #pilImage.save("/home/evan/rgb.png", "PNG")
-            cv2Image = np.array(pilImage)
-            return cv2Image
-        '''
 
     def releaseFrame(self):
         self.listener.release(self.frames)

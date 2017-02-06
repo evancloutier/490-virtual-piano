@@ -19,15 +19,12 @@ class BoundsDetector:
             self.color = self.frames["color"]
 
             self.getLargestContour()
-            self.getROIBounds()
-
 
             cv2.imshow("Color", cv2.resize(self.color, (int(1920 / 3), int(1080 / 3))))
             self.kinect.releaseFrame()
             k = cv2.waitKey(10)
 
             if k == 27:
-                self.getROIBounds()
                 cv2.destroyAllWindows()
                 break
             elif k == ord('q'):
@@ -84,9 +81,8 @@ class BoundsDetector:
         newy2 = y2 + int(d * p)
         y2 = height if newy2 > height else newy2
 
-
         return (x1, y1, x2, y2)
 
     def getROIBounds(self):
         x, y, w, h = cv2.boundingRect(self.largestContour)
-        return self.getROIPoints(x, y, x + w, y + h, 0.5)
+        return self.getROIPoints(x, y, x + w, y + h, 0.3)
