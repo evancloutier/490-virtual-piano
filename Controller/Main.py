@@ -5,6 +5,7 @@ import FingerDetector
 import KeyDetector
 import BoundsDetector
 import DepthProcessor
+import FingerMapper
 
 class Main:
     def __init__(self):
@@ -13,6 +14,7 @@ class Main:
         threshVal = 159
 
 
+        self.fingerMapper = FingerMapper.FingerMapper()
         self.fingerDetector = FingerDetector.FingerDetector(blurSize, threshVal, False, self.kinect)
         self.fingerDetector.buildSkinColorHistogram(self.kinect)
         self.boundsDetector = BoundsDetector.BoundsDetector(self.kinect)
@@ -30,7 +32,7 @@ class Main:
 
             filteredIm, backProject = self.fingerDetector.applyHistogram(color)
             fingerIm, fingerPoints = self.fingerDetector.getFingerPositions(filteredIm)
-
+            
             self.keyDetector.drawKeys(color)
             #for idx in fingerPoints:
             #    cv2.circle(color, (fingerPoints[idx][0], fingerPoints[idx][1]), 4, color=(0,255,0), thickness=3)
