@@ -51,7 +51,7 @@ class KeyDetector:
             noteName = noteNames[noteIdx]
             noteOctave = idx / len(noteNames) + 1
             noteName += str(noteOctave)
-            self.keys[noteName] = contour[:]
+            self.keys[noteName] = contour[0][:]
 
             noteIdx = (noteIdx + 1) % len(noteNames)
 
