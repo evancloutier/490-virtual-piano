@@ -78,20 +78,9 @@ class Kinect:
         self.frames = self.listener.waitForNewFrame()
         self.listener.release(self.frames)
 
-        self.bounds = None
-        self.depthBounds = None
-
-    def setDepthBounds(self):
-        if self.depthBounds is None:
-            (x1, y1, x2, y2) = self.bounds
-
-            # Need to scale the points to fit within the depth frame
-            dY1 = int((float(424) / float(1080)) * float(y1))
-            dX1 = int((float(512) / float(1920)) * float(x1))
-            dY2 = int((float(424) / float(1080)) * float(y2))
-            dX2 = int((float(512) / float(1920)) * float(x2))
-
-            self.depthBounds = (dX1, dY1, dX2, dY2)
+        self.keyBounds = None
+        self.colorHandBounds = None
+        self.depthHandBounds = None
 
     def getFrame(self):
         self.frames = self.listener.waitForNewFrame()
@@ -100,16 +89,76 @@ class Kinect:
         color = self.frames["color"].asarray()
         depth = self.frames["depth"].asarray()
 
-        if self.bounds is not None and len(self.bounds) == 4:
-            if self.depthBounds is None:
-                self.setDepthBounds()
-            color = color[self.bounds[1]: self.bounds[3], self.bounds[0]: self.bounds[2]]
-            depth = depth[self.depthBounds[1]: self.depthBounds[3], self.depthBounds[0]: self.depthBounds[2]]
+        if self.keyBounds is not None and len(self.keyBounds) == 4:
+            color = color[self.keyBounds[1]: self.keyBounds[3], self.keyBounds[0]: self.keyBounds[2]]
 
         arrayMap["color"] = color
         arrayMap["depth"] = depth
 
         return arrayMap
+
+    def getHandColorFrame(self, frame):
+        if self.colorHandBounds is not None:
+            return frame[self.colorHandBounds[1]: self.colorHandBounds[3], self.colorHandBounds[0]: self.colorHandBounds[2]]
+        else:
+            return frame
+
+    def getHandDepthFrame(self, colorFrame, depthFrame):
+        if self.colorHandBounds is not None:
+            # Retrieve the bounds on color frame
+            x1, y1, x2, y2 = self.colorHandBounds
+            print "({0}, {1}), ({2}, {3})".format(x1, y1, x2, y2)
+
+            # Get row, col of color frame
+            cCol, cRow, _ = colorFrame.shape
+            dCol, dRow = depthFrame.shape
+
+            print "cCol: {0}, cRow: {1}".format(cCol, cRow)
+            print "dCol: {0}, dRow: {1}".format(dCol, dRow)
+
+            dY1 = int((float(dCol) / float(cCol)) * float(y1))
+            dX1 = int((float(dRow) / float(cRow)) * float(x1))
+            dY2 = int((float(dCol) / float(cCol)) * float(y2))
+            dX2 = int((float(dRow) / float(cRow)) * float(x2))
+
+            print "({0}, {1}), ({2}, {3})".format(dX1, dY1, dX2, dY2)
+
+            return depthFrame[dY1: dY2, dX1: dX2]
+        else:
+            return depthFrame
+
+
+
+        # if self.colorHandBounds is not None:
+        #     # Retrieve bounds on color frame
+        #     (x1, y1, x2, y2) = self.colorHandBounds
+        #
+        #     # Convert bounds to depth frame
+        #     dRow, dCol = depthFrame.shape
+        #     cRow, cCol, _ = colorFrame.shape
+        #
+        #     dY1 = int((float(dCol) / float(cCol)) * float(y1))
+        #     dX1 = int((float(dRow) / float(cRow)) * float(x1))
+        #     dY2 = int((float(dCol) / float(cCol)) * float(y2))
+        #     dX2 = int((float(dRow) / float(cRow)) * float(x2))
+        #
+        #     return depthFrame[dY1: dY2, dX1: dX2]
+        # else:
+        #     return depthFrame
+
+    # def setDepthBounds(self):
+    #     if self.depthBounds is None:
+    #         x1, y1, x2, y2 = self.keyBounds
+    #
+    #         # Need to scale the points to fit within the depth frame
+    #         dY1 = int((float(424) / float(1080)) * float(y1))
+    #         dX1 = int((float(512) / float(1920)) * float(x1))
+    #         dY2 = int((float(424) / float(1080)) * float(y2))
+    #         dX2 = int((float(512) / float(1920)) * float(x2))
+    #
+    #         self.depthHandBounds = (dX1, dY1, dX2, dY2)
+
+
 
     def releaseFrame(self):
         self.listener.release(self.frames)

@@ -11,6 +11,7 @@ from skimage.morphology import skeletonize
 
 width = 1920
 height = 1080
+histRange = [0, 180]
 
 blackImg = np.zeros((height,width,3), np.uint8)
 
@@ -39,6 +40,7 @@ class FingerDetector:
             self.threshVal -= 5
             print "threshold -= 5 ", self.threshVal
 
+    # Need to get rid of the cv2.vidSrc in this function
     def continuousFingers(self):
         while True:
             frame = self.getFrame()
@@ -104,14 +106,11 @@ class FingerDetector:
                 for yIdx in range(y - sampleRadius, y + sampleRadius):
                     mask[yIdx][xIdx] = 255
             idx += 1
-        maskedImage = cv2.bitwise_and(frame, frame, mask=mask)
+        maskedImage = cv2.bitwise_and(frame, frame, mask = mask)
 
         color = ('b','g','r')
-        hist = cv2.calcHist([hsv], [0], mask, [256], [0,256])
+        hist = cv2.calcHist([hsv], [0], mask, [256], histRange)
         hist = cv2.normalize(hist, hist, 0, 255, cv2.NORM_MINMAX)
-
-        hist = cv2.normalize(hist, hist, 0, 255, cv2.NORM_MINMAX)
-
         return hist
 
     def buildSkinColorHistogram(self, kinect):
@@ -134,9 +133,12 @@ class FingerDetector:
         frame = frame.copy()
         blackImgCopy = self.getBackgroundCopy(len(frame), len(frame[0]))
         hsv = cv2.cvtColor(frame, cv2.COLOR_RGB2HSV)
-        filteredIm = cv2.calcBackProject([hsv], [0], self.hist, [0,180,0,256], 1)
+        filteredIm = cv2.calcBackProject([hsv], [0, 1], self.hist, histRange, 1)
 
         backProject = filteredIm.copy()
+        backProject = cv2.medianBlur(backProject, self.blurPixelSize)
+
+        cv2.imshow("Back Projection", backProject)
 
         filteredIm = self.blurFrame(filteredIm, self.blurPixelSize)
         hand = self.getLargestShapes(filteredIm)[0]
@@ -172,7 +174,6 @@ class FingerDetector:
         if closePoint[1] > farPoint[1]:
             return None
         return farPoint
-
 
     def findLargestInscribedRectangle(self, binaryIm):
         sumMatrix = np.zeros((len(binaryIm), len(binaryIm[0])), np.uint8)
@@ -288,7 +289,6 @@ class FingerDetector:
                     cv2.destroyAllWindows()
                     break
 
-
     def getBackgroundCopy(self, height, width):
         img = np.zeros((height,width,3), np.uint8)
         return img
@@ -299,19 +299,18 @@ class FingerDetector:
         blur = cv2.medianBlur(frame, blurPixelSize)
         return blur
 
-
     def thresholdFrame(self, frame, threshVal):
         maxVal = 255
         ret, threshFrame = cv2.threshold(frame, threshVal, maxVal, cv2.THRESH_BINARY)
         return threshFrame
 
-
     '''shape functions'''
     def getLargestShapes(self, frame, bothHands=False):
-        _, contours, contourHeirarchy = cv2.findContours(frame, cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE)
+        _, contours, contourHeirarchy = cv2.findContours(frame.copy(), cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE)
         maxContourSize = 0
         largestContour = []
         secondLargestContour = []
+
         for contour in contours:
             if len(contour) > maxContourSize:
                 maxContourSize = len(contour)
@@ -321,7 +320,6 @@ class FingerDetector:
         if bothHands:
             return (largestContour, secondLargestContour)
         return (largestContour, None)
-
 
     def getConvexHull(self, contour):
         hull = None

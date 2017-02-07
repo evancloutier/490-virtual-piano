@@ -86,3 +86,7 @@ class BoundsDetector:
     def getROIBounds(self):
         x, y, w, h = cv2.boundingRect(self.largestContour)
         return self.getROIPoints(x, y, x + w, y + h, 0.3)
+
+    def getBoundingBoxOfHand(self, hand):
+        x, y, w, h = cv2.boundingRect(hand)
+        return self.getROIPoints(x, y, x + w, y + h, 0.15)

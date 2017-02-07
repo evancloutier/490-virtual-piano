@@ -12,11 +12,10 @@ class Main:
         blurSize = 7
         threshVal = 159
 
-
         self.fingerDetector = FingerDetector.FingerDetector(blurSize, threshVal, False, self.kinect)
         self.fingerDetector.buildSkinColorHistogram(self.kinect)
         self.boundsDetector = BoundsDetector.BoundsDetector(self.kinect)
-        self.kinect.bounds = self.boundsDetector.getROIBounds()
+        self.kinect.keyBounds = self.boundsDetector.getROIBounds()
         self.keyDetector = KeyDetector.KeyDetector(self.kinect, "C")
         self.depthProcessor = DepthProcessor.DepthProcessor(self.kinect)
 
@@ -24,14 +23,26 @@ class Main:
 
         while True:
             frame = self.kinect.getFrame()
-
             color = frame["color"]
             depth = frame["depth"]
 
             filteredIm, backProject = self.fingerDetector.applyHistogram(color)
-            fingerIm, fingerPoints = self.fingerDetector.getFingerPositions(filteredIm)
+            self.kinect.colorHandBounds = self.boundsDetector.getBoundingBoxOfHand(self.fingerDetector.hand)
 
-            self.keyDetector.drawKeys(color)
+            x1, y1, x2, y2 = self.kinect.colorHandBounds
+            cv2.rectangle(color, (x1, y1), (x2, y2), (0, 0, 0), 2)
+
+            handColorFrame = self.kinect.getHandColorFrame(color)
+            handDepthFrame = self.kinect.getHandDepthFrame(color, depth)
+            handDepthColorMap = self.depthProcessor.processDepthFrame(handDepthFrame)
+
+            cv2.imshow("Color", color)
+
+            if len(handDepthFrame) > 0 and len(handDepthFrame[0]) > 0:
+                cv2.imshow("Depth Hand Frame", handDepthColorMap)
+
+            # fingerIm, fingerPoints = self.fingerDetector.getFingerPositions(filteredIm)
+            # self.keyDetector.drawKeys(color)
             #for idx in fingerPoints:
             #    cv2.circle(color, (fingerPoints[idx][0], fingerPoints[idx][1]), 4, color=(0,255,0), thickness=3)
 
@@ -68,10 +79,11 @@ class Main:
 
             # cv2.imshow("Stream", boundedImage)
             #cv2.imshow("Stream", cv2.resize(boundedImage, (int(1920 / 3), int(1080 / 3))))
-            cv2.imshow('raw im', color)#cv2.resize(color, (int(1920 / 3), int(1080 / 3))))
+            # cv2.imshow('raw im', color)#cv2.resize(color, (int(1920 / 3), int(1080 / 3))))
+            # cv2.imshow("Depth", depthColor)
 
-            cv2.imshow('filter', filteredIm)#cv2.resize(filteredIm, (int(1920 / 3), int(1080 / 3))))
-            cv2.imshow('hand', fingerIm)#cv2.resize(fingerIm, (int(1920 / 3), int(1080 / 3))))
+            # cv2.imshow('filter', filteredIm)#cv2.resize(filteredIm, (int(1920 / 3), int(1080 / 3))))
+            # cv2.imshow('hand', fingerIm)#cv2.resize(fingerIm, (int(1920 / 3), int(1080 / 3))))
 
             self.kinect.releaseFrame()
 
