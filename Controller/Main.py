@@ -34,6 +34,7 @@ class Main:
             fingerIm, fingerPoints = self.fingerDetector.getFingerPositions(filteredIm)
             
             self.keyDetector.drawKeys(color)
+            self.fingerMapper.getKeysBeingHovered(fingerPoints, self.keyDetector.contours, self.keyDetector.keys)
             #for idx in fingerPoints:
             #    cv2.circle(color, (fingerPoints[idx][0], fingerPoints[idx][1]), 4, color=(0,255,0), thickness=3)
 
