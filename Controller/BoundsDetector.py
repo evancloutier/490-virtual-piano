@@ -88,5 +88,7 @@ class BoundsDetector:
         return self.getROIPoints(x, y, x + w, y + h, 0.3)
 
     def getBoundingBoxOfHand(self, hand):
+        if hand is None or type(hand) != np.ndarray:
+            return self.getROIPoints(0,0,0,0,0)
         x, y, w, h = cv2.boundingRect(hand)
         return self.getROIPoints(x, y, x + w, y + h, 0.15)

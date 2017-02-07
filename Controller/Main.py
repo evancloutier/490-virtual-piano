@@ -30,60 +30,28 @@ class Main:
             self.kinect.colorHandBounds = self.boundsDetector.getBoundingBoxOfHand(self.fingerDetector.hand)
 
             x1, y1, x2, y2 = self.kinect.colorHandBounds
+
             cv2.rectangle(color, (x1, y1), (x2, y2), (0, 0, 0), 2)
 
-            handColorFrame = self.kinect.getHandColorFrame(color)
-            handDepthFrame = self.kinect.getHandDepthFrame(color, depth)
-            handDepthColorMap = self.depthProcessor.processDepthFrame(handDepthFrame)
+            filteredHandIm = self.kinect.getHandColorFrame(filteredIm)
+            if len(filteredHandIm) > 0 and len(filteredHandIm[0]) > 0:
+                cv2.imshow("filtered hand im", filteredHandIm)
 
+
+            fingerIm, fingerPoints = self.fingerDetector.getFingerPositions(filteredHandIm, x1, y1)
+
+            if fingerIm is not None:
+                if len(fingerIm) > 0 and len(fingerIm[0]) > 0:
+                    cv2.imshow("finger im", fingerIm)
+
+            if fingerPoints is not None:
+                for point in fingerPoints:
+                    cv2.circle(color, (point[0], point[1]), 4, color=(255,255,0), thickness=3)
+
+
+            #handDepthFrame = self.kinect.getHandDepthFrame(color, depth)
+            #handDepthColorMap = self.depthProcessor.processDepthFrame(handDepthFrame)
             cv2.imshow("Color", color)
-
-            if len(handDepthFrame) > 0 and len(handDepthFrame[0]) > 0:
-                cv2.imshow("Depth Hand Frame", handDepthColorMap)
-
-            # fingerIm, fingerPoints = self.fingerDetector.getFingerPositions(filteredIm)
-            # self.keyDetector.drawKeys(color)
-            #for idx in fingerPoints:
-            #    cv2.circle(color, (fingerPoints[idx][0], fingerPoints[idx][1]), 4, color=(0,255,0), thickness=3)
-
-
-            # bounds = self.boundsDetector.getROIBounds()
-            # boundedColor = colorArray[bounds[1]: bounds[3], bounds[0]: bounds[2]]
-            # boundedDepth = depthArray[bounds[1]: bounds[3], bounds[0]: bounds[2]]
-            #
-            #for contour in self.keyDetector.contours:
-            #    c = contour[0]
-            #    cv2.drawContours(color, [c], -1, (0, 0, 0), 2)
-            #    cv2.circle(color, (contour[1], contour[2]), 4, (0, 0, 0), -1)
-            #
-            # cv2.imshow("Bounded Color", cv2.resize(boundedColor, (int(1920 / 3), int(1080 / 3))))
-            # cv2.imshow("Bounded Depth", boundedDepth / 4500.)
-            #
-            # depthColor = self.depthProcessor.processDepthFrame(depth)
-
-            # self.kinect.registration.apply(color, depth, self.kinect.undistorted, self.kinect.registered, None, None)
-            #
-            # cv2.circle(self.kinect.registered.asarray(np.uint8), (300, 300), 7, (255, 0, 0), -1)
-            # cv2.circle(depth.asarray(), (300, 300), 7, (255, 0, 0), -1)
-            # (x, y, z) = self.kinect.registration.getPointXYZ(self.kinect.undistorted, 300, 300)
-            # print "X: {0}, Y: {1}, Z: {2}".format(x, y, z)
-            #
-            # cv2.imshow("Depth", depth.asarray() / 4500.)
-            # cv2.imshow("Registered", self.kinect.registered.asarray(np.uint8))
-            #
-
-            #bounds = self.boundsDetector.getROIBounds()
-
-            # numpy slicing to get our ROI
-            #boundedImage = frame[bounds[1]: bounds[3], bounds[0]: bounds[2]]
-
-            # cv2.imshow("Stream", boundedImage)
-            #cv2.imshow("Stream", cv2.resize(boundedImage, (int(1920 / 3), int(1080 / 3))))
-            # cv2.imshow('raw im', color)#cv2.resize(color, (int(1920 / 3), int(1080 / 3))))
-            # cv2.imshow("Depth", depthColor)
-
-            # cv2.imshow('filter', filteredIm)#cv2.resize(filteredIm, (int(1920 / 3), int(1080 / 3))))
-            # cv2.imshow('hand', fingerIm)#cv2.resize(fingerIm, (int(1920 / 3), int(1080 / 3))))
 
             self.kinect.releaseFrame()
 
