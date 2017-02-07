@@ -56,9 +56,13 @@ class Main:
                     cv2.circle(color, (point[0], point[1]), 4, color=(255,255,0), thickness=3)
 
 
-            #handDepthFrame = self.kinect.getHandDepthFrame(color, depth)
-            #handDepthColorMap = self.depthProcessor.processDepthFrame(handDepthFrame)
+            handDepthFrame = self.kinect.getHandDepthFrame(color, depth)
+            handDepthColorMap = self.depthProcessor.processDepthFrame(handDepthFrame)
             cv2.imshow("Color", color)
+
+            if handDepthColorMap is not None:
+                if len(handDepthColorMap) > 0 and len(handDepthColorMap[0]) > 0:
+                    cv2.imshow("depth", handDepthColorMap)
 
             self.kinect.releaseFrame()
 
