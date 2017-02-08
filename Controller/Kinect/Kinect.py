@@ -76,6 +76,7 @@ class Kinect:
 
         # Retrieve and release the first frame for initialization
         self.frames = self.listener.waitForNewFrame()
+        self.originalColorFrame = self.frames["color"].asarray()
         self.listener.release(self.frames)
 
         self.keyBounds = None
@@ -107,22 +108,38 @@ class Kinect:
         if self.colorHandBounds is not None:
             # Retrieve the bounds on color frame
             x1, y1, x2, y2 = self.colorHandBounds
-            print "({0}, {1}), ({2}, {3})".format(x1, y1, x2, y2)
+            #original color frame
+            origHeight, origWidth, _ = self.originalColorFrame.shape
+            #color frame bounded by ROI bounds
+            bNearXOffset, bNearYOffset, bFarXOffset, bFarYOffset = self.keyBounds
+            depthHeight, depthWidth = depthFrame.shape
 
-            # Get row, col of color frame
-            cCol, cRow, _ = colorFrame.shape
-            dCol, dRow = depthFrame.shape
+            #bNearXOFfset / origWidth = dX1 / dWidth
+            #dX1 = bNearXOffset * depthWidth / origWidth
 
-            print "cCol: {0}, cRow: {1}".format(cCol, cRow)
-            print "dCol: {0}, dRow: {1}".format(dCol, dRow)
+            widthScalingFactor = float(depthWidth) / origWidth
+            heightScalingFactor = float(depthHeight) / origHeight
 
-            dY1 = int((float(dCol) / float(cCol)) * float(y1))
-            dX1 = int((float(dRow) / float(cRow)) * float(x1))
-            dY2 = int((float(dCol) / float(cCol)) * float(y2))
-            dX2 = int((float(dRow) / float(cRow)) * float(x2))
+            dX1 = int((bNearXOffset + x1) * widthScalingFactor)
+            if dX1 * 0.9 > 0:
+                dX1 = int(dX1 * 0.9)
 
-            print "({0}, {1}), ({2}, {3})".format(dX1, dY1, dX2, dY2)
+            else:
+                dX1 = 0
+            dX2 = int((bNearXOffset + x2) * widthScalingFactor)
+            if dX2 * 1.1 < depthWidth:
+                dX2 = int(dX2 * 1.1)
+            else:
+                dX2 = depthWidth - 1
+            dY1 = int((bNearYOffset + y1) * heightScalingFactor)
+            if dY1 > depthHeight:
+                dY1 = 0
+            dY2 = int((bNearYOffset + y2) * heightScalingFactor)
+            if dY2 < 0:
+                dY2 = 0
+            #cv2.rectangle(depthFrame, (dX1, dY1), (dX2, dY2), color=(255,255,0), thickness = 5)
 
+            #return depthFrame
             return depthFrame[dY1: dY2, dX1: dX2]
         else:
             return depthFrame
