@@ -22,12 +22,15 @@ class Main:
         self.keyDetector = KeyDetector.KeyDetector(self.kinect, "C")
         self.depthProcessor = DepthProcessor.DepthProcessor(self.kinect)
 
+        #keys are 31cm long
     def controlLoop(self):
 
         while True:
             frame = self.kinect.getFrame()
+            frames = self.kinect.frames
             color = frame["color"]
             depth = frame["depth"]
+            
 
             filteredIm, backProject = self.fingerDetector.applyHistogram(color)
             self.kinect.colorHandBounds = self.boundsDetector.getBoundingBoxOfHand(self.fingerDetector.hand)
@@ -65,10 +68,10 @@ class Main:
                 for point in depthFingerPoints:
                     cv2.circle(depth, (point[0], point[1]), 4, color=(0,0,0), thickness=-3)
                 
-
+            cv2.imshow("original color", originalColor)
             handDepthFrame = self.kinect.getHandDepthFrame(color, depth)
             handDepthColorMap = self.depthProcessor.processDepthFrame(handDepthFrame)
-            cv2.imshow("Color", color)
+            
 
             if handDepthColorMap is not None:
                 if len(handDepthColorMap) > 0 and len(handDepthColorMap[0]) > 0:

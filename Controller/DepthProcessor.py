@@ -49,34 +49,8 @@ class DepthProcessor:
         
     def convertColorFingerPoints(self, fingerPoints, depthFrame, croppedColorFrame):
         
-#                #color frame bounded by ROI bounds
+                #color frame bounded by ROI bounds
         bNearXOffset, bNearYOffset, bFarXOffset, bFarYOffset = self.kinect.keyBounds
-#        depthHeight, depthWidth = depthFrame.shape
-#
-#        #bNearXOFfset / origWidth = dX1 / dWidth
-#        #dX1 = bNearXOffset * depthWidth / origWidth
-#
-#        widthScalingFactor = float(depthWidth) / origWidth
-#        heightScalingFactor = float(depthHeight) / origHeight
-#
-#        dX1 = int((bNearXOffset + x1) * widthScalingFactor)
-#        if dX1 * 0.9 > 0:
-#            dX1 = int(dX1 * 0.9)
-#
-#        else:
-#            dX1 = 0
-#        dX2 = int((bNearXOffset + x2) * widthScalingFactor)
-#        if dX2 * 1.1 < depthWidth:
-#            dX2 = int(dX2 * 1.1)
-#        else:
-#            dX2 = depthWidth - 1
-#        dY1 = int((bNearYOffset + y1) * heightScalingFactor)
-#        if dY1 > depthHeight:
-#            dY1 = 0
-#        dY2 = int((bNearYOffset + y2) * heightScalingFactor)
-#        if dY2 < 0:
-#            dY2 = 0
-        
         
         
         #create new finger points to return
@@ -98,7 +72,7 @@ class DepthProcessor:
         
         for point in fingerPoints:
             print "point", point
-            newX = (point[0] + bNearXOffset) * xScalingFactor
+            newX = (point[0] + bNearXOffset) * xScalingFactor - 90.7
             newY = (point[1] + bNearYOffset) * yScalingFactor
             convertedFingerPoints.append((int(newX), int(newY)))
             print "new PointX", newX
