@@ -6,6 +6,7 @@ import KeyDetector
 import BoundsDetector
 import DepthProcessor
 import FingerMapper
+import WriteNotes
 
 class Main:
     def __init__(self):
@@ -13,6 +14,7 @@ class Main:
         blurSize = 7
         threshVal = 159
 
+        self.writeNotes = WriteNotes.WriteNotes()
         self.fingerMapper = FingerMapper.FingerMapper()
         self.fingerDetector = FingerDetector.FingerDetector(blurSize, threshVal, False, self.kinect)
         self.fingerDetector.buildSkinColorHistogram(self.kinect)
@@ -46,7 +48,8 @@ class Main:
 
             keysBeingHovered = self.fingerMapper.getKeysBeingHovered(fingerPoints, self.keyDetector.keys)
 
-            print "keys being hovered", keysBeingHovered
+            self.writeNotes.writeKeyNamesToFile(keysBeingHovered)
+            #print "keys being hovered", keysBeingHovered
 
             if fingerIm is not None:
                 if len(fingerIm) > 0 and len(fingerIm[0]) > 0:
