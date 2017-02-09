@@ -55,7 +55,16 @@ class Main:
             if fingerPoints is not None:
                 for point in fingerPoints:
                     cv2.circle(color, (point[0], point[1]), 4, color=(255,255,0), thickness=3)
-
+            
+            #process the points to write on the depth frame
+            depthFingerPoints = self.depthProcessor.convertColorFingerPoints(fingerPoints, depth, filteredHandIm)
+            
+            
+            #write that to the color frame
+            if depthFingerPoints is not None:
+                for point in depthFingerPoints:
+                    cv2.circle(depth, (point[0], point[1]), 4, color=(0,0,0), thickness=-3)
+                
 
             handDepthFrame = self.kinect.getHandDepthFrame(color, depth)
             handDepthColorMap = self.depthProcessor.processDepthFrame(handDepthFrame)
@@ -75,6 +84,8 @@ class Main:
                 break
             #else:
             #    self.fingerDetector.adjustParams(k)
+            
+            
 
 main = Main()
 main.controlLoop()

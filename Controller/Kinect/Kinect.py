@@ -139,8 +139,8 @@ class Kinect:
                 dY2 = 0
             #cv2.rectangle(depthFrame, (dX1, dY1), (dX2, dY2), color=(255,255,0), thickness = 5)
 
-            #return depthFrame
-            return depthFrame[dY1: dY2, dX1: dX2]
+            return depthFrame
+            #return depthFrame[dY1: dY2, dX1: dX2]
         else:
             return depthFrame
 
