@@ -6,7 +6,6 @@ import KeyDetector
 import BoundsDetector
 import DepthProcessor
 import FingerMapper
-import WriteNotes
 
 class Main:
     def __init__(self):
@@ -14,7 +13,6 @@ class Main:
         blurSize = 7
         threshVal = 159
 
-        self.writeNotes = WriteNotes.WriteNotes()
         self.fingerMapper = FingerMapper.FingerMapper()
         self.fingerDetector = FingerDetector.FingerDetector(blurSize, threshVal, False, self.kinect)
         self.fingerDetector.buildSkinColorHistogram(self.kinect)
@@ -42,14 +40,11 @@ class Main:
             if len(filteredHandIm) > 0 and len(filteredHandIm[0]) > 0:
                 cv2.imshow("filtered hand im", filteredHandIm)
 
-
             fingerIm, fingerPoints = self.fingerDetector.getFingerPositions(filteredHandIm, x1, y1)
-
 
             keysBeingHovered = self.fingerMapper.getKeysBeingHovered(fingerPoints, self.keyDetector.keys)
 
-            self.writeNotes.writeKeyNamesToFile(keysBeingHovered)
-            #print "keys being hovered", keysBeingHovered
+            print "keys being hovered", keysBeingHovered
 
             if fingerIm is not None:
                 if len(fingerIm) > 0 and len(fingerIm[0]) > 0:
@@ -58,7 +53,6 @@ class Main:
             if fingerPoints is not None:
                 for point in fingerPoints:
                     cv2.circle(color, (point[0], point[1]), 4, color=(255,255,0), thickness=3)
-
 
             handDepthFrame = self.kinect.getHandDepthFrame(color, depth)
             handDepthColorMap = self.depthProcessor.processDepthFrame(handDepthFrame)
