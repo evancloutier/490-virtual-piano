@@ -7,6 +7,7 @@ class ReadNotes:
         self.file = None
 
     def readNotes(self):
+        notes = []
         if os.path.exists(self.fileLocation):
             self.file = open(self.fileLocation)
 
@@ -20,5 +21,4 @@ class ReadNotes:
                     notes[idx] = notes[idx].strip()
 
             self.file.close()
-
-readNotes = ReadNotes()
+        return notes

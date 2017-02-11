@@ -45,6 +45,7 @@ class Main:
             keysBeingHovered = self.fingerMapper.getKeysBeingHovered(fingerPoints, self.keyDetector.keys)
 
             print "keys being hovered", keysBeingHovered
+            self.writeNotes.writeNewKeyNamesToFile(keysBeingHovered)
 
             if fingerIm is not None:
                 if len(fingerIm) > 0 and len(fingerIm[0]) > 0:

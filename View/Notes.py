@@ -3,11 +3,10 @@ import cv2
 import numpy
 import Queue
 
-pygame.mixer.init()
-pygame.init()
-
 class Notes:
     def __init__(self):
+        pygame.mixer.init()
+        pygame.init()
         self.C4 = pygame.mixer.Sound("Notes/C4.wav")
         self.Db4 = pygame.mixer.Sound("Notes/Db4.wav")
         self.D4 = pygame.mixer.Sound("Notes/D4.wav")
@@ -22,18 +21,18 @@ class Notes:
         self.B4 = pygame.mixer.Sound("Notes/B4.wav")
 
         self.allNotes = {
-            "C4": self.C4,
-            "Db4": self.Db4,
-            "D4": self.D4,
-            "Eb4": self.Eb4,
-            "E4": self.E4,
-            "F4": self.F4,
-            "Gb4": self.Gb4,
-            "G4": self.G4,
-            "Ab4": self.Ab4,
-            "A4": self.A4,
-            "Bb4": self.Bb4,
-            "B4": self.B4,
+            "C1": self.C4,
+            "Db1": self.Db4,
+            "D1": self.D4,
+            "Eb1": self.Eb4,
+            "E1": self.E4,
+            "F1": self.F4,
+            "Gb1": self.Gb4,
+            "G1": self.G4,
+            "Ab1": self.Ab4,
+            "A1": self.A4,
+            "Bb1": self.Bb4,
+            "B1": self.B4,
         }
 
         self.noteQueue = Queue.Queue()
@@ -43,65 +42,3 @@ class Notes:
             note = queue.get()
             note.stop()
         queue.put(note)
-
-    def cv2Play(self):
-        im = numpy.zeros((200,200))
-        while True:
-            cv2.imshow('im',im)
-            k = cv2.waitKey(10)
-
-
-            if k == ord('q'):
-                self.checkQueueFull(self.noteQueue, self.C4)
-                self.C4.stop()
-                self.C4.play()
-            elif k == ord('w'):
-                self.checkQueueFull(self.noteQueue, self.Db4)
-                self.Db4.stop()
-                self.Db4.play()
-            elif k == ord('e'):
-                self.checkQueueFull(self.noteQueue, self.D4)
-                self.D4.stop()
-                self.D4.play()
-            elif k == ord('r'):
-                self.checkQueueFull(self.noteQueue, self.Eb4)
-                self.Eb4.stop()
-                self.Eb4.play()
-            elif k == ord('t'):
-                self.checkQueueFull(self.noteQueue, self.E4)
-                self.E4.stop()
-                self.E4.play()
-            elif k == ord('y'):
-                self.checkQueueFull(self.noteQueue, self.F4)
-                self.F4.stop()
-                self.F4.play()
-            elif k == ord('u'):
-                self.checkQueueFull(self.noteQueue, self.Gb4)
-                self.Gb4.stop()
-                self.Gb4.play()
-            elif k == ord('i'):
-                self.checkQueueFull(self.noteQueue, self.G4)
-                self.G4.stop()
-                self.G4.play()
-            elif k == ord('o'):
-                self.checkQueueFull(self.noteQueue, self.Ab4)
-                self.Ab4.stop()
-                self.Ab4.play()
-            elif k == ord('p'):
-                self.checkQueueFull(self.noteQueue, self.A4)
-                self.A4.stop()
-                self.A4.play()
-            elif k == ord('a'):
-                self.checkQueueFull(self.noteQueue, self.Bb4)
-                self.Bb4.stop()
-                self.Bb4.play()
-            elif k == ord('s'):
-                self.checkQueueFull(self.noteQueue, self.B4)
-                self.B4.stop()
-                self.B4.play()
-
-            elif k == 27:
-                break
-
-notes = Notes()
-notes.cv2Play()
