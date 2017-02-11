@@ -5,6 +5,7 @@ class ReadNotes:
     def __init__(self):
         self.fileLocation = "../Model/Keys.txt"
         self.file = None
+        self.oldNotes = set()
 
     def readNotes(self):
         notes = []
@@ -21,4 +22,12 @@ class ReadNotes:
                     notes[idx] = notes[idx].strip()
 
             self.file.close()
+        notes = self.getNewNotes(notes)
         return notes
+
+    def getNewNotes(self, newNotes):
+        newNotesCopy = newNotes[:]
+        newNotes = set(newNotes)
+        newNotes = newNotes - self.oldNotes
+        self.oldNotes = set(newNotesCopy)
+        return list(newNotes)
