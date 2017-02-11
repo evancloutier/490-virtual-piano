@@ -48,6 +48,19 @@ class DepthCalibrator:
         else:
             return int(((255) * (value - lowBound)) / (highBound - lowBound) + lowBound)
     
+    def getMouseCoordsColor(something, event,  x, y, flags, param ):
+        global xColor, yColor
+        if event == cv2.EVENT_LBUTTONDOWN:
+            xColor, yColor = x, y
+            print "xColor: ", xColor
+            print "yColor: ", yColor
+            
+    def getMouseCoordsDepth(something, event,  x, y, flags, param ):
+        global xDepth, yDepth
+        if event == cv2.EVENT_LBUTTONDOWN:
+            xDepth, yDepth = x, y
+            
+    
     def controlLoop(self):
         try:
             from pylibfreenect2 import OpenCLPacketPipeline
@@ -85,27 +98,25 @@ class DepthCalibrator:
             color = frames["color"].asarray()
             depth = frames["depth"].asarray()
             
+            cv2.imshow("color", color)
+            cv2.setMouseCallback("color", self.getMouseCoordsColor)
             
-            gray = cv2.cvtColor(color, cv2.COLOR_BGR2GRAY)
-            ret, thresh = cv2.threshold(gray, otsuThresh, 255, cv2.THRESH_BINARY_INV)
-#            cv2.imshow("color", cv2.resize(color.asarray(),                                           (int(1920 / 3), int(1080 / 3))))
+            cv2.imshow("depth", self.processDepthFrame(depth))
+            cv2.setMouseCallback("depth", self.getMouseCoordsDepth)
             
-
-            newDepth = self.processDepthFrame(depth)
-            cv2.imshow("depth", newDepth)
-            cv2.imshow("thresh", cv2.resize(thresh,(int(1920 / 3), int(1080 / 3))))
             
             listener.release(frames)
 
             key = cv2.waitKey(delay=1)
             if key == ord('q'):
                 break
-            if key == ord('1'):
-                otsuThresh = otsuThresh + 5
-                print "threshold: ", otsuThresh
-            if key == ord('2'):
-                otsuThresh = otsuThresh - 5
-                print "threshold: ", otsuThresh
+            if key == ord('d'):
+                print "depthX: ", xDepth
+                print "depthY: ", yDepth
+            if key == ord('c'):
+                print "colorX: ", xColor
+                print "colorY: ", yColor
+                
             
 
         device.stop()

@@ -39,6 +39,8 @@ class Main:
 
             cv2.rectangle(color, (x1, y1), (x2, y2), (0, 0, 0), 2)
 
+            
+            
             filteredHandIm = self.kinect.getHandColorFrame(filteredIm)
             if len(filteredHandIm) > 0 and len(filteredHandIm[0]) > 0:
                 cv2.imshow("filtered hand im", filteredHandIm)
@@ -62,21 +64,29 @@ class Main:
             #process the points to write on the depth frame
             depthFingerPoints = self.depthProcessor.convertColorFingerPoints(fingerPoints, depth, filteredHandIm)
             
+            cv2.imshow("color", color)
+        
             
-            #write that to the color frame
-            if depthFingerPoints is not None:
-                for point in depthFingerPoints:
-                    cv2.circle(depth, (point[0], point[1]), 4, color=(0,0,0), thickness=-3)
-                
-            cv2.imshow("original color", originalColor)
             handDepthFrame = self.kinect.getHandDepthFrame(color, depth)
             handDepthColorMap = self.depthProcessor.processDepthFrame(handDepthFrame)
             
+            
+            
+                
+            #write that to the color frame
+            if depthFingerPoints is not None:
+                print depthFingerPoints
+                for point in depthFingerPoints:
+                    cv2.circle(handDepthColorMap, (point[0], point[1]), 4, color=(255,255,0), thickness=5)
+            
+            cv2.circle(handDepthColorMap, (255, 200), 4, color=(255,255,0), thickness = 5)
 
             if handDepthColorMap is not None:
                 if len(handDepthColorMap) > 0 and len(handDepthColorMap[0]) > 0:
                     cv2.imshow("depth", handDepthColorMap)
 
+                    
+                    
             self.kinect.releaseFrame()
 
             k = cv2.waitKey(10)

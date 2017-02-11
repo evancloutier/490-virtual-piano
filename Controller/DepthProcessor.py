@@ -49,33 +49,30 @@ class DepthProcessor:
         
     def convertColorFingerPoints(self, fingerPoints, depthFrame, croppedColorFrame):
         
-                #color frame bounded by ROI bounds
+        #color frame bounded by ROI bounds
         bNearXOffset, bNearYOffset, bFarXOffset, bFarYOffset = self.kinect.keyBounds
         
+        #get shape of depth frame
+        dY, dX = depthFrame.shape
+        
+        cY, cX, _ = self.kinect.originalColorFrame.shape
         
         #create new finger points to return
         convertedFingerPoints = []
         
-        yOffset, xOffset, _ = croppedColorFrame.shape
+        xM1 = 278 #Manually calibrated difference between depth range and color range
+        xM2 = 1795
         
-        #get scaling value first
-        dY, dX = depthFrame.shape
-        cY, cX, _ = self.kinect.originalColorFrame.shape
-        
-        print depthFrame.shape
-        print self.kinect.originalColorFrame.shape
         
         yScalingFactor = float(dY) / cY
-        xScalingFactor = float(dX) / cX
-        print "yScalingFactor", yScalingFactor
-        print "xScalingFactor", xScalingFactor
-        
-        for point in fingerPoints:
-            print "point", point
-            newX = (point[0] + bNearXOffset) * xScalingFactor - 90.7
-            newY = (point[1] + bNearYOffset) * yScalingFactor
-            convertedFingerPoints.append((int(newX), int(newY)))
-            print "new PointX", newX
-            print "new Pointy", newY
+        if fingerPoints is not None:
+            for point in fingerPoints:
+                fX = point[0]
+                fY = point[1]
+                fX = fX + (bNearXOffset - xM1)
+                depthPointX = (float(fX) * dX)/(cX - xM1 - (cX - xM2) )
+                depthPointY = (fY + bNearYOffset) * yScalingFactor
+                convertedFingerPoints.append([int(depthPointX), int(depthPointY)])
+                
             
         return convertedFingerPoints
