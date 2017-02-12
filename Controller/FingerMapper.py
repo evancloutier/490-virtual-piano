@@ -6,7 +6,7 @@ class FingerMapper:
         pass
 
     def getKeysBeingHovered(self, fingerPoints, keys):
-        keysBeingHovered = []
+        keysBeingHovered = dict()
         if fingerPoints is None or keys is None:
             return keysBeingHovered
         #we want to reference the fingerPoints with the area of the keyContours
@@ -18,6 +18,6 @@ class FingerMapper:
                     #get the corresponding key note from the contour
                     for key in keys:
                         if np.array_equal(keys[key], cnt):
-                            keysBeingHovered.append(key)
+                            keysBeingHovered[key] = point
 
         return keysBeingHovered     #returns a list of keys that are being hovered over

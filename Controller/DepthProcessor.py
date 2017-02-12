@@ -28,27 +28,31 @@ class DepthProcessor:
                     #print "x ", x
                     self.sumDepthValues.itemset(index, (x + prevDepth))
 
-    def checkFingerPoints(self, fingerPoints, depthFrame, colFrame, origFingerPoints):
-        dx, dy = depthFrame.shape
-
-        if fingerPoints is not None and len(fingerPoints) != 0:
-            points = fingerPoints[0]
-
-            cv2.circle(colFrame, (origFingerPoints[0][0], origFingerPoints[0][1]), 4, (255, 255, 255), 3)
-            cv2.circle(depthFrame, (points[0], points[1]), 4, (255, 255, 255), 3)
-
-            print "({0}, {1})".format(points[0], points[1])
-            print depthFrame.item(points[1], points[0])
-
-            # cv2.circle(colFrame, (origFingerPoints[0][0], origFingerPoints[0][1]), 4, color=(255,0, 255), thickness=3)
-            # cv2.circle(colFrame, (250, 200), 4, color=(255,0, 255), thickness=3)
-
-            # if points[1] < dy and points[0] < dx:
-            #     print self.depthValues.item(points[0], points[1])
-            #     print "Finger points: ({0}, {1})".format(points[0], points[1])
-            #     print depthFrame.item(points[0], points[1])
-            #     print depthFrame.item(points[0], points[1]) - self.depthValues.item(points[0], points[1])
-            #     print "----------------------------"
+    def checkFingerPoints(self, depthFrame, keysBeingHovered):
+        #so we loop through each of points in keysBeingHovered
+        #convert that point to depth point
+        #check that depth point value with self.depthValues point
+        
+        keysBeingPressed = []
+        
+        for key in keysBeingHovered:
+            colorPoint = keysBeingHovered[key]
+            #now convert point
+            depthPointX, depthPointY = self.convertColorFingerPoint(colorPoint, depthFrame)
+            
+            #draw point to show it works
+            cv2.circle(depthFrame, (depthPointX, depthPointY), 4, color=(255,255,0), thickness=3)
+            
+            #now use that depthPoint to determine depth at that point
+            depthDifference = self.depthValues.item(depthPointY, depthPointX) - depthFrame.item(depthPointY, depthPointX)
+            print depthDifference
+            
+            if depthDifference > 15:
+                keysBeingPressed.append(key)
+        
+        print keysBeingPressed
+        return keysBeingPressed    
+                
 
 
     def processDepthFrame(self, depth):
@@ -89,7 +93,7 @@ class DepthProcessor:
     def generateRGBList(self, value):
         rgb = value * 0x00010101
 
-    def convertColorFingerPoints(self, fingerPoints, depthFrame, croppedColorFrame):
+    def convertColorFingerPoint(self, fingerPoint, depthFrame):
 
         #color frame bounded by ROI bounds
         bNearXOffset, bNearYOffset, bFarXOffset, bFarYOffset = self.kinect.keyBounds
@@ -99,22 +103,16 @@ class DepthProcessor:
 
         cY, cX, _ = self.kinect.originalColorFrame.shape
 
-        #create new finger points to return
-        convertedFingerPoints = []
-
         xM1 = 278 #Manually calibrated difference between depth range and color range
         xM2 = 1795
 
-
         yScalingFactor = float(dY) / cY
-        if fingerPoints is not None:
-            for point in fingerPoints:
-                fX = point[0]
-                fY = point[1]
-                fX = fX + (bNearXOffset - xM1)
-                depthPointX = (float(fX) * dX)/(cX - xM1 - (cX - xM2) )
-                depthPointY = (fY + bNearYOffset) * yScalingFactor
-                convertedFingerPoints.append([int(depthPointX), int(depthPointY)])
+        if fingerPoint is not None:  
+            fX = fingerPoint[0]
+            fY = fingerPoint[1]
+            fX = fX + (bNearXOffset - xM1)
+            depthPointX = (float(fX) * dX)/(cX - xM1 - (cX - xM2) )
+            depthPointY = (fY + bNearYOffset) * yScalingFactor
 
 
-        return convertedFingerPoints
+        return int(depthPointX), int(depthPointY)
