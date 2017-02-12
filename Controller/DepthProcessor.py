@@ -8,6 +8,24 @@ import pdb
 class DepthProcessor:
     def __init__(self, kinect):
         self.kinect = kinect
+        self.sumDepthValues = np.zeros((424, 512))
+        self.depthValues = None
+
+
+    def initializeDepthMap(self, depth, counter):
+        row, col = depth.shape
+
+        # Copying our depth values
+        for index, x in np.ndenumerate(depth):
+            if math.isnan(x):
+                continue
+            else:
+                if counter == 0:
+                    self.sumDepthValues.itemset(index, x)
+                else:
+                    prevDepth = self.sumDepthValues.item(index)
+                    self.sumDepthValues.itemset(index, (x + prevDepth))
+
 
     def processDepthFrame(self, depth):
         row, col = depth.shape

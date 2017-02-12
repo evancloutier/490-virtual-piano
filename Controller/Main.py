@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+import time
 import Kinect.Kinect as Kinect
 import FingerDetector
 import KeyDetector
@@ -13,14 +14,38 @@ class Main:
         blurSize = 7
         threshVal = 159
 
-        self.fingerMapper = FingerMapper.FingerMapper()
-        self.fingerDetector = FingerDetector.FingerDetector(blurSize, threshVal, False, self.kinect)
-        self.fingerDetector.buildSkinColorHistogram(self.kinect)
+        # self.fingerMapper = FingerMapper.FingerMapper()
+        # self.fingerDetector = FingerDetector.FingerDetector(blurSize, threshVal, False, self.kinect)
+        # self.fingerDetector.buildSkinColorHistogram(self.kinect)
         self.boundsDetector = BoundsDetector.BoundsDetector(self.kinect)
         self.kinect.keyBounds = self.boundsDetector.getROIBounds()
-        print "key bounds", self.kinect.keyBounds
-        self.keyDetector = KeyDetector.KeyDetector(self.kinect, "C")
+        # print "key bounds", self.kinect.keyBounds
+        # self.keyDetector = KeyDetector.KeyDetector(self.kinect, "C")
         self.depthProcessor = DepthProcessor.DepthProcessor(self.kinect)
+
+    def initializeDepthLoop(self):
+        counter = 0
+
+        start = time.time()
+        while counter < 10:
+            frame = self.kinect.getFrame()
+            depth = frame["depth"]
+            self.depthProcessor.initializeDepthMap(depth, counter)
+
+            self.kinect.releaseFrame()
+            counter += 1
+
+            k = cv2.waitKey(10)
+
+            if k == 27:
+                cv2.destroyAllWindows()
+                self.kinect.exit()
+                break
+
+        nines = np.zeros((424, 512))
+        nines.fill(10)
+        self.depthProcessor.depthValues = self.depthProcessor.sumDepthValues / nines
+        end = time.time()
 
     def controlLoop(self):
 
@@ -75,4 +100,5 @@ class Main:
             #    self.fingerDetector.adjustParams(k)
 
 main = Main()
-main.controlLoop()
+main.initializeDepthLoop()
+# main.controlLoop()
