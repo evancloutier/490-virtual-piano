@@ -1,7 +1,7 @@
 import pygame
 import cv2
 import numpy
-import Queue
+import NoteQueue
 
 class Notes:
     def __init__(self):
@@ -35,7 +35,18 @@ class Notes:
             "B1": self.B4,
         }
 
-        self.noteQueue = Queue.Queue()
+        self.noteQueue = NoteQueue.NoteQueue()
+
+
+    def addToQueue(self, note):
+        self.noteQueue.put(note)
+
+
+    def removeFromQueue(self, note):
+        self.noteQueue.remove()
+
+    def getOldestNote(self):
+        return self.noteQueue.get()
 
     def checkQueueFull(self, queue, note):
         if queue.qsize() == 8:

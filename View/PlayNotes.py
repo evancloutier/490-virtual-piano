@@ -10,17 +10,29 @@ class PlayNotes:
 
     def playNotes(self):
         while True:
-            audioNotes = []
-            noteNames = self.readNotes.readNotes()
-            print noteNames
-            for noteName in noteNames:
-                if noteName != "":
-                    audioNotes.append(self.musicalNotes.allNotes[noteName])
+            notesToPlay = []
+            notesToRelease = []
+            newNotes, releasedNotes = self.readNotes.readNotes()
+            print "new:", newNotes
+            print "released:", releasedNotes
+            for newNote in newNotes:
+                if newNote != "":
+                    notesToPlay.append(self.musicalNotes.allNotes[newNote])
 
-            for audioNote in audioNotes:
-                self.musicalNotes.checkQueueFull(self.musicalNotes.noteQueue, audioNote)
-                audioNote.stop()
-                audioNote.play()
+            for releasedNote in releasedNotes:
+                if releasedNote != "":
+                    notesToRelease.append(self.musicalNotes.allNotes[releasedNote])
+
+
+            for newNote in newNotes:
+                self.musicalNotes.addToQueue(self.musicalNotes.noteQueue, newNote)
+                newNote.stop()
+                newNote.play()
+
+            for releasedNote in releasedNotes:
+                self.musicalNotes.removeFromQueue(self.musicalNotes.noteQueue, releasedNote)
+                releasedNote.stop()
+
 
     def getNewNotes(self, newNotes):
         newNotes = newNotes - self.prevNotes
