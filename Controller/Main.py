@@ -78,13 +78,13 @@ class Main:
             fingerIm, fingerPoints = self.fingerDetector.getFingerPositions(filteredHandIm, x1, y1)
 
             keysBeingHovered = self.fingerMapper.getKeysBeingHovered(fingerPoints, self.keyDetector.keys)
-            
+
             #check to see if the finger points are being pressed
             keysBeingPressed = self.depthProcessor.checkFingerPoints(depth, keysBeingHovered)
-            
+
             #print "keys being hovered", keysBeingHovered
 
-            self.writeNotes.writeKeyNamesToFile(keysBeingHovered)
+            self.writeNotes.writeKeyNamesToFile(keysBeingPressed)
 
 
             if fingerIm is not None:
@@ -94,9 +94,9 @@ class Main:
             if fingerPoints is not None:
                 for point in fingerPoints:
                     cv2.circle(color, (point[0], point[1]), 4, color=(255,255,0), thickness=3)
-            
 
-            
+
+
 
             cv2.imshow("color", color)
             cv2.imshow("depth", depth / 4500.)

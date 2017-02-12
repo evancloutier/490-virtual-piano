@@ -32,27 +32,27 @@ class DepthProcessor:
         #so we loop through each of points in keysBeingHovered
         #convert that point to depth point
         #check that depth point value with self.depthValues point
-        
+
         keysBeingPressed = []
-        
+
         for key in keysBeingHovered:
             colorPoint = keysBeingHovered[key]
             #now convert point
             depthPointX, depthPointY = self.convertColorFingerPoint(colorPoint, depthFrame)
-            
+
             #draw point to show it works
             cv2.circle(depthFrame, (depthPointX, depthPointY), 4, color=(255,255,0), thickness=3)
-            
+
             #now use that depthPoint to determine depth at that point
             depthDifference = self.depthValues.item(depthPointY, depthPointX) - depthFrame.item(depthPointY, depthPointX)
             print depthDifference
-            
-            if depthDifference > 15:
+
+            if depthDifference < 12:
                 keysBeingPressed.append(key)
-        
+
         print keysBeingPressed
-        return keysBeingPressed    
-                
+        return keysBeingPressed
+
 
 
     def processDepthFrame(self, depth):
@@ -107,7 +107,7 @@ class DepthProcessor:
         xM2 = 1795
 
         yScalingFactor = float(dY) / cY
-        if fingerPoint is not None:  
+        if fingerPoint is not None:
             fX = fingerPoint[0]
             fY = fingerPoint[1]
             fX = fX + (bNearXOffset - xM1)
