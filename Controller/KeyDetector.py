@@ -7,7 +7,7 @@ class KeyDetector:
 
     def __init__(self, kinect, firstNote):
         self.kinect = kinect
-        self.lowerThresh = 192
+        self.lowerThresh = 180
         self.upperThresh = 255
         self.keys = dict()
 

@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+import time
 import Kinect.Kinect as Kinect
 import FingerDetector
 import KeyDetector
@@ -13,17 +14,43 @@ class Main:
         self.kinect = Kinect.Kinect()
         blurSize = 7
         threshVal = 159
-
+        
         self.writeNotes = WriteNotes.WriteNotes()
         self.fingerMapper = FingerMapper.FingerMapper()
         self.fingerDetector = FingerDetector.FingerDetector(blurSize, threshVal, False, self.kinect)
         self.fingerDetector.buildSkinColorHistogram(self.kinect)
         self.boundsDetector = BoundsDetector.BoundsDetector(self.kinect)
         self.kinect.keyBounds = self.boundsDetector.getROIBounds()
+        # print "key bounds", self.kinect.keyBounds
         self.keyDetector = KeyDetector.KeyDetector(self.kinect, "C")
         self.depthProcessor = DepthProcessor.DepthProcessor(self.kinect)
 
-        #keys are 31cm long
+    def initializeDepthLoop(self):
+        counter = 0
+
+        print("Initializing depth matrix...")
+        start = time.time()
+        while counter < 10:
+            frame = self.kinect.getFrame()
+            depth = frame["depth"]
+            self.depthProcessor.initializeDepthMap(depth, counter)
+
+            self.kinect.releaseFrame()
+            counter += 1
+
+            k = cv2.waitKey(10)
+
+            if k == 27:
+                cv2.destroyAllWindows()
+                self.kinect.exit()
+                break
+
+        tens = np.zeros((424, 512))
+        tens.fill(10)
+        self.depthProcessor.depthValues = self.depthProcessor.sumDepthValues / tens
+        end = time.time()
+        print "Done initializing, took ", end - start, "seconds"
+
     def controlLoop(self):
 
         while True:
@@ -62,6 +89,8 @@ class Main:
                     cv2.circle(color, (point[0], point[1]), 4, color=(255,255,0), thickness=3)
             #process the points to write on the depth frame
             depthFingerPoints = self.depthProcessor.convertColorFingerPoints(fingerPoints, depth, filteredHandIm)
+            
+            self.depthProcessor.checkFingerPoints(depthFingerPoints, depth, color, fingerPoints)
 
             cv2.imshow("color", color)
 
@@ -83,4 +112,5 @@ class Main:
 
 
 main = Main()
+main.initializeDepthLoop()
 main.controlLoop()
