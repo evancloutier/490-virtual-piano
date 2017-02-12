@@ -1,4 +1,4 @@
-
+import pdb
 class NoteQueue:
     def __init__(self):
         self.noteQueue = dict()
@@ -22,8 +22,11 @@ class NoteQueue:
         if self.size == self.max:
             self.get()
 
-        maxIdx = max(self.noteQueue, key=lambda i: self.noteQueue[i])
-        self.noteQueue[item] = maxIdx + 1
+        maxVal = 0
+        for k in self.noteQueue:
+            if self.noteQueue[k] > maxVal:
+                maxVal = self.noteQueue[k]
+        self.noteQueue[item] = maxVal + 1
         self.size += 1
 
     def get(self):
@@ -36,5 +39,3 @@ class NoteQueue:
             for key in self.noteQueue:
                 self.noteQueue[key] -= 1
             self.size -= 1
-
-

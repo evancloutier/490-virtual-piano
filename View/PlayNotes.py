@@ -16,22 +16,22 @@ class PlayNotes:
             print "new:", newNotes
             print "released:", releasedNotes
             for newNote in newNotes:
-                if newNote != "":
+                if newNote != "" and len(newNote) != 0:
                     notesToPlay.append(self.musicalNotes.allNotes[newNote])
 
             for releasedNote in releasedNotes:
-                if releasedNote != "":
+                if releasedNote != "" and len(newNote) != 0:
                     notesToRelease.append(self.musicalNotes.allNotes[releasedNote])
 
 
-            for newNote in newNotes:
-                self.musicalNotes.addToQueue(self.musicalNotes.noteQueue, newNote)
-                newNote.stop()
-                newNote.play()
+            for noteToPlay in notesToPlay:
+                self.musicalNotes.addToQueue(noteToPlay)
+                noteToPlay.stop()
+                noteToPlay.play()
 
-            for releasedNote in releasedNotes:
-                self.musicalNotes.removeFromQueue(self.musicalNotes.noteQueue, releasedNote)
-                releasedNote.stop()
+            for noteToRelease in notesToRelease:
+                self.musicalNotes.removeFromQueue(noteToRelease)
+                noteToRelease.stop()
 
 
     def getNewNotes(self, newNotes):
