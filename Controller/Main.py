@@ -83,7 +83,9 @@ class Main:
             keysBeingPressed = self.depthProcessor.checkFingerPoints(depth, keysBeingHovered)
             
             #print "keys being hovered", keysBeingHovered
-            #self.writeNotes.writeNewKeyNamesToFile(keysBeingPressed)
+
+            self.writeNotes.writeKeyNamesToFile(keysBeingHovered)
+
 
             if fingerIm is not None:
                 if len(fingerIm) > 0 and len(fingerIm[0]) > 0:

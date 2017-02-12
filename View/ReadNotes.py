@@ -22,8 +22,9 @@ class ReadNotes:
                     notes[idx] = notes[idx].strip()
 
             self.file.close()
-        notes = self.getNewNotes(notes)
-        return notes
+        newNotes = self.getNewNotes(notes)
+        releasedNotes = self.getReleasedNotes(notes)
+        return (newNotes, releasedNotes)
 
     def getNewNotes(self, newNotes):
         newNotesCopy = newNotes[:]
@@ -31,3 +32,9 @@ class ReadNotes:
         newNotes = newNotes - self.oldNotes
         self.oldNotes = set(newNotesCopy)
         return list(newNotes)
+
+    def getReleasedNotes(self, newNotes):
+        newNotes = set(newNotes)
+        releasedNotes = self.oldNotes - newNotes
+        return list(releasedNotes)
+
