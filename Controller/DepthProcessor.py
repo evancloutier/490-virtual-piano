@@ -51,6 +51,7 @@ class DepthProcessor:
 
         # Apply color map to RGB array
         colorMap = cv2.applyColorMap(colorDepth, cv2.COLORMAP_WINTER)
+        
 
         # Return it to display
         return colorMap
@@ -63,3 +64,33 @@ class DepthProcessor:
 
     def generateRGBList(self, value):
         rgb = value * 0x00010101
+        
+    def convertColorFingerPoints(self, fingerPoints, depthFrame, croppedColorFrame):
+        
+        #color frame bounded by ROI bounds
+        bNearXOffset, bNearYOffset, bFarXOffset, bFarYOffset = self.kinect.keyBounds
+        
+        #get shape of depth frame
+        dY, dX = depthFrame.shape
+        
+        cY, cX, _ = self.kinect.originalColorFrame.shape
+        
+        #create new finger points to return
+        convertedFingerPoints = []
+        
+        xM1 = 278 #Manually calibrated difference between depth range and color range
+        xM2 = 1795
+        
+        
+        yScalingFactor = float(dY) / cY
+        if fingerPoints is not None:
+            for point in fingerPoints:
+                fX = point[0]
+                fY = point[1]
+                fX = fX + (bNearXOffset - xM1)
+                depthPointX = (float(fX) * dX)/(cX - xM1 - (cX - xM2) )
+                depthPointY = (fY + bNearYOffset) * yScalingFactor
+                convertedFingerPoints.append([int(depthPointX), int(depthPointY)])
+                
+            
+        return convertedFingerPoints
