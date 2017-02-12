@@ -74,6 +74,12 @@ class Kinect:
         self.undistorted = Frame(512, 424, 4)
         self.registered = Frame(512, 424, 4)
 
+        self.need_bigdepth = True
+        self.need_color_depth_map = True
+
+        self.bigdepth = Frame(1920, 1082, 4) if self.need_bigdepth else None
+        self.color_depth_map = np.zeros((424, 512), np.int32).ravel() if self.need_color_depth_map else None
+
         # Retrieve and release the first frame for initialization
         self.frames = self.listener.waitForNewFrame()
         self.originalColorFrame = self.frames["color"].asarray()
