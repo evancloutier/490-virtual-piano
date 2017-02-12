@@ -63,9 +63,9 @@ class FingerDetector:
 
     #http://www.benmeline.com/finger-tracking-with-opencv-and-python/
     def getSkinSamples(self, frame, sampleRadius=5):
-        sampleWidth = 100
-        sampleHeight = 200
-        numSamples = 9
+        sampleWidth = 80
+        sampleHeight = 180
+        numSamples = 45
 
         startingWidth = (width - sampleWidth) / 2
         startingHeight = (height - sampleHeight) / 2
@@ -204,8 +204,28 @@ class FingerDetector:
 
         return (x,y,maxVal)
 
+    def getLikelyFingers(self, cnts, centerOfHand):
+        filteredCnts = []
+        for cnt in cnts:
+            if self.getExtremePoints(cnt, centerOfHand) is not None:
+                filteredCnts.append(cnt)
+        if len(filteredCnts) > 5:
+            filteredCnts = sorted(cnts, key=lambda x: cv2.moments(x)['m00'], reverse=True)[:5]
+        areas = [cv2.moments(cnt)['m00'] for cnt in filteredCnts]
+        mean = float(sum(areas) / max(len(filteredCnts), 1))
+        standardDev = np.std(areas)
+        cnts = []
+        for cnt in filteredCnts:
+            area = cv2.moments(cnt)['m00']
+            if area > mean - 1 * standardDev:
+                cnts.append(cnt)
+        return filteredCnts
+
     def getTips(self, blackImgCopy, cnts, centerOfHand):
         farPoints = []
+
+        cnts = self.getLikelyFingers(cnts, centerOfHand)
+
         for idx, cnt in enumerate(cnts):
             farPoint = self.getExtremePoints(cnt, centerOfHand)
             if farPoint is not None:
@@ -316,6 +336,14 @@ class FingerDetector:
                 secondLargestContour = largestContour
                 largestContour = contour
 
+        if type(largestContour) == np.ndarray:
+            M = cv2.moments(largestContour)
+
+            area = M['m00']
+            areaThresh = 100
+            if area < areaThresh:
+                largestContour = None
+                secondLargestContour = None
         if bothHands:
             return (largestContour, secondLargestContour)
         return (largestContour, None)
