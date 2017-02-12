@@ -30,17 +30,19 @@ class DepthProcessor:
 
     def checkFingerPoints(self, fingerPoints, depthFrame, colFrame, origFingerPoints):
         dx, dy = depthFrame.shape
-        print depthFrame.shape
 
         if fingerPoints is not None and len(fingerPoints) != 0:
             points = fingerPoints[0]
 
+            cv2.circle(colFrame, (origFingerPoints[0][0], origFingerPoints[0][1]), 4, (255, 255, 255), 3)
+            cv2.circle(depthFrame, (points[0], points[1]), 4, (255, 255, 255), 3)
+
+            print "({0}, {1})".format(points[0], points[1])
+            print depthFrame.item(points[1], points[0])
+
             # cv2.circle(colFrame, (origFingerPoints[0][0], origFingerPoints[0][1]), 4, color=(255,0, 255), thickness=3)
-            cv2.circle(colFrame, (250, 200), 4, color=(255,0, 255), thickness=3)
+            # cv2.circle(colFrame, (250, 200), 4, color=(255,0, 255), thickness=3)
 
-
-            print "original depth at 250, 200: ", self.depthValues.item(250, 200)
-            print "Current depth value at 250, 200: ", depthFrame.item(250, 200)
             # if points[1] < dy and points[0] < dx:
             #     print self.depthValues.item(points[0], points[1])
             #     print "Finger points: ({0}, {1})".format(points[0], points[1])

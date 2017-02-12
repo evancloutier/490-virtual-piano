@@ -95,6 +95,7 @@ class Main:
             self.depthProcessor.checkFingerPoints(depthFingerPoints, depth, color, fingerPoints)
 
             cv2.imshow("color", color)
+            cv2.imshow("depth", depth / 4500.)
             #cv2.imshow("Average depth value", self.depthProcessor.depthValues)
 
             #handDepthFrame = self.kinect.getHandDepthFrame(color, depth)
