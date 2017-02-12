@@ -11,7 +11,7 @@ class BoundsDetector:
 
     def __init__(self, kinect):
         self.kinect = kinect
-        self.lowerThresh = 185
+        self.lowerThresh = 195
         self.upperThresh = 255
 
         while True:

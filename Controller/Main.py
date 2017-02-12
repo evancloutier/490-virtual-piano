@@ -14,7 +14,7 @@ class Main:
         self.kinect = Kinect.Kinect()
         blurSize = 7
         threshVal = 159
-        
+
         self.writeNotes = WriteNotes.WriteNotes()
         self.fingerMapper = FingerMapper.FingerMapper()
         self.fingerDetector = FingerDetector.FingerDetector(blurSize, threshVal, False, self.kinect)
@@ -48,6 +48,8 @@ class Main:
         tens = np.zeros((424, 512))
         tens.fill(10)
         self.depthProcessor.depthValues = self.depthProcessor.sumDepthValues / tens
+        print np.amax(self.depthProcessor.sumDepthValues)
+        print np.amax(self.depthProcessor.depthValues)
         end = time.time()
         print "Done initializing, took ", end - start, "seconds"
 
@@ -89,10 +91,11 @@ class Main:
                     cv2.circle(color, (point[0], point[1]), 4, color=(255,255,0), thickness=3)
             #process the points to write on the depth frame
             depthFingerPoints = self.depthProcessor.convertColorFingerPoints(fingerPoints, depth, filteredHandIm)
-            
+
             self.depthProcessor.checkFingerPoints(depthFingerPoints, depth, color, fingerPoints)
 
             cv2.imshow("color", color)
+            #cv2.imshow("Average depth value", self.depthProcessor.depthValues)
 
             #handDepthFrame = self.kinect.getHandDepthFrame(color, depth)
             #handDepthColorMap = self.depthProcessor.processDepthFrame(handDepthFrame)
