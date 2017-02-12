@@ -14,7 +14,8 @@ class Main:
         self.kinect = Kinect.Kinect()
         blurSize = 7
         threshVal = 159
-
+        
+        self.writeNotes = WriteNotes.WriteNotes()
         self.fingerMapper = FingerMapper.FingerMapper()
         self.fingerDetector = FingerDetector.FingerDetector(blurSize, threshVal, False, self.kinect)
         self.fingerDetector.buildSkinColorHistogram(self.kinect)
@@ -27,6 +28,7 @@ class Main:
     def initializeDepthLoop(self):
         counter = 0
 
+        print("Initializing depth matrix...")
         start = time.time()
         while counter < 10:
             frame = self.kinect.getFrame()
@@ -43,10 +45,11 @@ class Main:
                 self.kinect.exit()
                 break
 
-        nines = np.zeros((424, 512))
-        nines.fill(10)
-        self.depthProcessor.depthValues = self.depthProcessor.sumDepthValues / nines
+        tens = np.zeros((424, 512))
+        tens.fill(10)
+        self.depthProcessor.depthValues = self.depthProcessor.sumDepthValues / tens
         end = time.time()
+        print "Done initializing, took ", end - start, "seconds"
 
     def controlLoop(self):
 
@@ -86,6 +89,8 @@ class Main:
                     cv2.circle(color, (point[0], point[1]), 4, color=(255,255,0), thickness=3)
             #process the points to write on the depth frame
             depthFingerPoints = self.depthProcessor.convertColorFingerPoints(fingerPoints, depth, filteredHandIm)
+            
+            self.depthProcessor.checkFingerPoints(depthFingerPoints, depth, color, fingerPoints)
 
             cv2.imshow("color", color)
 
@@ -108,4 +113,4 @@ class Main:
 
 main = Main()
 main.initializeDepthLoop()
-# main.controlLoop()
+main.controlLoop()

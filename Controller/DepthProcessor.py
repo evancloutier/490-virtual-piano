@@ -14,7 +14,8 @@ class DepthProcessor:
 
     def initializeDepthMap(self, depth, counter):
         row, col = depth.shape
-
+    
+        
         # Copying our depth values
         for index, x in np.ndenumerate(depth):
             if math.isnan(x):
@@ -26,7 +27,23 @@ class DepthProcessor:
                     prevDepth = self.sumDepthValues.item(index)
                     self.sumDepthValues.itemset(index, (x + prevDepth))
 
+    def checkFingerPoints(self, fingerPoints, depthFrame, colFrame, origFingerPoints):
+        dx, dy = depthFrame.shape
+        
+        if fingerPoints is not None and len(fingerPoints) != 0:
+            points = fingerPoints[0]
+            
+            cv2.circle(colFrame, (origFingerPoints[0][0], origFingerPoints[0][1]), 4, color=(255,0, 255), thickness=3)
+            
+            print "x, y", points[0], points[1]
+            if points[1] < dy and points[0] < dx:
+                print self.depthValues[points[1]][points[0]] - depthFrame[points[1]][points[0]]
+#            for points in fingerPoints:
+#                if points[1] < dy and points[0] < dx:
+#                    print depthFrame[points[1]][points[0]] #- self.depthValues[points[1]][points[0]]    
+#                
 
+                    
     def processDepthFrame(self, depth):
         row, col = depth.shape
 
