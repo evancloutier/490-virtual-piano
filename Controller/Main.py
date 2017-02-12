@@ -31,7 +31,7 @@ class Main:
             frames = self.kinect.frames
             color = frame["color"]
             depth = frame["depth"]
-            
+
 
             filteredIm, backProject = self.fingerDetector.applyHistogram(color)
             self.kinect.colorHandBounds = self.boundsDetector.getBoundingBoxOfHand(self.fingerDetector.hand)
@@ -40,8 +40,8 @@ class Main:
 
             cv2.rectangle(color, (x1, y1), (x2, y2), (0, 0, 0), 2)
 
-            
-            
+
+
             filteredHandIm = self.kinect.getHandColorFrame(filteredIm)
             if len(filteredHandIm) > 0 and len(filteredHandIm[0]) > 0:
                 cv2.imshow("filtered hand im", filteredHandIm)
@@ -60,37 +60,15 @@ class Main:
             if fingerPoints is not None:
                 for point in fingerPoints:
                     cv2.circle(color, (point[0], point[1]), 4, color=(255,255,0), thickness=3)
-<<<<<<< HEAD
-            
             #process the points to write on the depth frame
             depthFingerPoints = self.depthProcessor.convertColorFingerPoints(fingerPoints, depth, filteredHandIm)
-            
+
             cv2.imshow("color", color)
-        
-            
-=======
 
->>>>>>> 7fa4bed03d9c7ea22d44b05c5afa2e600da3c9d4
-            handDepthFrame = self.kinect.getHandDepthFrame(color, depth)
-            handDepthColorMap = self.depthProcessor.processDepthFrame(handDepthFrame)
-            
-            
-            
-                
-            #write that to the color frame
-            if depthFingerPoints is not None:
-                print depthFingerPoints
-                for point in depthFingerPoints:
-                    cv2.circle(handDepthColorMap, (point[0], point[1]), 4, color=(255,255,0), thickness=5)
-            
-            cv2.circle(handDepthColorMap, (255, 200), 4, color=(255,255,0), thickness = 5)
+            #handDepthFrame = self.kinect.getHandDepthFrame(color, depth)
+            #handDepthColorMap = self.depthProcessor.processDepthFrame(handDepthFrame)
 
-            if handDepthColorMap is not None:
-                if len(handDepthColorMap) > 0 and len(handDepthColorMap[0]) > 0:
-                    cv2.imshow("depth", handDepthColorMap)
 
-                    
-                    
             self.kinect.releaseFrame()
 
             k = cv2.waitKey(10)
@@ -101,8 +79,8 @@ class Main:
                 break
             #else:
             #    self.fingerDetector.adjustParams(k)
-            
-            
+
+
 
 main = Main()
 main.controlLoop()
