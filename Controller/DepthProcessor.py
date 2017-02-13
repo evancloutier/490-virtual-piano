@@ -10,7 +10,10 @@ class DepthProcessor:
         self.kinect = kinect
         self.sumDepthValues = np.zeros((424, 512))
         self.depthValues = None
-        self.avgKeyMat = np.zeros((12,1))
+        self.avgKeyMat = {"C1": [0],"Db1": [0],"D1": [0]
+                          ,"Eb1": [0],"E1": [0],"F1": [0]
+                          ,"Gb1": [0],"G1": [0],"Ab1": [0]
+                          ,"A1": [0],"Bb1": [0],"B1": [0]}
         self.frameCounter = 0
 
     def initializeDepthMap(self, depth, counter):
@@ -29,37 +32,27 @@ class DepthProcessor:
                     self.sumDepthValues.itemset(index, (x + prevDepth))
 
     def calculateNotesMatrix(self, keysBeingPressed):
-        
-        index = None
-        
-        myList = []
-        
-        myList = [False for i in range(12)]
-        
-        keyDict = {"C1": 0,"Db1": 1,"D1": 2
-                   ,"Eb1": 3,"E1": 4,"F1": 5
-                   ,"Gb1": 6,"G1": 7,"Ab1": 8
-                   ,"A1": 9,"Bb1": 10,"B1": 11}
-        
+
+        numFramesToConsider = 4
+        threshVal = 2
+        if len(self.avgKeyMat["C1"]) >= numFramesToConsider:
+            for key in self.avgKeyMat:
+                self.avgKeyMat[key].pop(0)
+
         if keysBeingPressed is not None:
-            for key in keysBeingPressed:
-                index = keyDict.get(key, None)
-                myList[index] = True
-                
-            
+            for key in self.avgKeyMat:
+                self.avgKeyMat[key].append(0)
+                if key in keysBeingPressed:
+                    self.avgKeyMat[key][-1] = 1
 
-            for key, index in keyDict:
-                isPressed = myList[index]
-                if self.frameCounter >= 20:                    
-                    np.delete(self.avgKeyMat[index], self.avgKeyMat[0][index])
-                if isPressed:
-                    np.append(self.avgKeyMat[index], 1)
-                else:
-                    np.append(self.avgKeyMat[index], 0)
-                
+        notes = []
+        for key in self.avgKeyMat:
+            if sum(self.avgKeyMat[key]) > threshVal:
+                notes.append(key)
+        return notes
 
-        print self.avgKeyMat
-        self.frameCounter = self.frameCounter + 1
+
+
 
     def checkFingerPoints(self, depthFrame, keysBeingHovered):
         #so we loop through each of points in keysBeingHovered
