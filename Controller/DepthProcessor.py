@@ -56,7 +56,7 @@ class DepthProcessor:
             elif key == "B":
                 index = 12
                 
-            self.avgKeyMat.item(keyPressed, self.frameCounter % 20) = 1    #column: key row: counter
+            self.avgKeyMat[keyPressed][self.frameCounter % 20] = 1    #column: key row: counter
             
         print self.avgKeyMat
         self.frameCounter = self.frameCounter + 1
