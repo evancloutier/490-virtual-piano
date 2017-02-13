@@ -36,10 +36,10 @@ class DepthProcessor:
         
         myList = [False for i in range(12)]
         
-        keyDict = {("C1": 0),("Db1": 1),("D1": 2)
-                   ,("Eb1": 3),("E1": 4),("F1": 5)
-                   ,("Gb1": 6),("G1": 7),("Ab1": 8)
-                   ,("A1": 9),("Bb1": 10),("B1": 11))}
+        keyDict = {"C1": 0,"Db1": 1,"D1": 2
+                   ,"Eb1": 3,"E1": 4,"F1": 5
+                   ,"Gb1": 6,"G1": 7,"Ab1": 8
+                   ,"A1": 9,"Bb1": 10,"B1": 11}
         
         if keysBeingPressed is not None:
             for key in keysBeingPressed:
