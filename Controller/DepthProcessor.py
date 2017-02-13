@@ -10,6 +10,7 @@ class DepthProcessor:
         self.kinect = kinect
         self.sumDepthValues = np.zeros((424, 512))
         self.depthValues = None
+        self.avgKeyMat = np.zeros(12)
         self.frameCounter = 0
 
     def initializeDepthMap(self, depth, counter):
@@ -33,30 +34,28 @@ class DepthProcessor:
         
         myList = []
         
-        for i in range(12):
-            myList.append([i, False])
-            print myList[i]
-            
+        myList = [False for i in range(12)]
         
-        keyDict = {("C1": myList[0]),("Db1":myList[1]),("D1":myList[2])
-                   ,("Eb1":myList[3]),("E1":myList[4]),("F1":myList[5])
-                   ,("Gb1":myList[6]),("G1":myList[7]),("Ab1":myList[8])
-                   ,("A1":myList[9]),("Bb1":myList[10]),("B1":myList[11]))}
+        keyDict = {("C1": 0),("Db1": 1),("D1": 2)
+                   ,("Eb1": 3),("E1": 4),("F1": 5)
+                   ,("Gb1": 6),("G1": 7),("Ab1": 8)
+                   ,("A1": 9),("Bb1": 10),("B1": 11))}
         
         if keysBeingPressed is not None:
             for key in keysBeingPressed:
-                index, isPressed = keyDict.get(key, None)
-                keyDict[key] = [index, True]
+                index = keyDict.get(key, None)
+                myList[index] = True
                 
             
 
-            for key, value in keyDict:
-                if self.frameCounter >= 20:
-                    self.avgKeyMat[value[0]].popLeft()
-                if value[1] == True:
-                    self.avgKeyMat[value[0]].append(1)
-                elif value[1] == False:
-                    self.avgKegMat[[value[0]]].append(0)
+            for key, index in keyDict:
+                isPressed = myList[index]
+                if self.frameCounter >= 20:                    
+                    self.avgKeyMat[index].popLeft()
+                if isPressed:
+                    self.avgKeyMat[index].append(1)
+                else:
+                    self.avgKegMat[index].append(0)
                 
 
         print self.avgKeyMat
