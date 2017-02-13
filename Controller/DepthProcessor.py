@@ -31,25 +31,32 @@ class DepthProcessor:
         
         index = None
         
-        keyDict = {("C1":(0, False)),("Db1":(1, False)),("D1":(2, False))
-                   ,("Eb1":(3, False)),("E1":(4, False)),("F1":(5, False))
-                   ,("Gb1":(6, False)),("G1":(7, False)),("Ab1":(8, False))
-                   ,("A1":(9, False)),("Bb1":(10, False)),("B1":(11, False))}
+        myList = [[0, False]]
         
-        if keysBeingPressed is not None:
-            for key in keysBeingPressed:
-                index, isPressed = keyDict.get(key, None)
-                keyDict[key] = index, True
-                
+        for i in range(11):
+            myList[i].append(i, False)
+            print myList[i]
             
-
-            for key, value in keyDict:
-                if self.frameCounter >= 20:
-                    self.avgKeyMat[value[0]].popLeft()
-                if value[1] == True:
-                    self.avgKeyMat[value[0]].append(1)
-                elif value[1] == False:
-                    self.avgKegMat[[value[0]]].append(0)
+        
+#        keyDict = {("C1":myList[0]),("Db1":(1, False)),("D1":(2, False))
+#                   ,("Eb1":(3, False)),("E1":(4, False)),("F1":(5, False))
+#                   ,("Gb1":(6, False)),("G1":(7, False)),("Ab1":(8, False))
+#                   ,("A1":(9, False)),("Bb1":(10, False)),("B1":(11, False))}
+#        
+#        if keysBeingPressed is not None:
+#            for key in keysBeingPressed:
+#                index, isPressed = keyDict.get(key, None)
+#                keyDict[key] = index, True
+#                
+#            
+#
+#            for key, value in keyDict:
+#                if self.frameCounter >= 20:
+#                    self.avgKeyMat[value[0]].popLeft()
+#                if value[1] == True:
+#                    self.avgKeyMat[value[0]].append(1)
+#                elif value[1] == False:
+#                    self.avgKegMat[[value[0]]].append(0)
                 
 
         print self.avgKeyMat
