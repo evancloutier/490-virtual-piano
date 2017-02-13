@@ -33,27 +33,27 @@ class DepthProcessor:
         for key in keysBeingPressed:
             if key == "C":
                 index = 1
-            elif key == "C#"
+            elif key == "C#":
                 index = 2
-            elif key == "D"
+            elif key == "D":
                 index = 3
-            elif key == "D#"
+            elif key == "D#":
                 index = 4
-            elif key == "E"
+            elif key == "E":
                 index = 5
-            elif key == "F"
+            elif key == "F":
                 index = 6
-            elif key == "F#"
+            elif key == "F#":
                 index = 7
-            elif key == "G"
+            elif key == "G":
                 index = 8
-            elif key == "G#"
+            elif key == "G#":
                 index = 9            
-            elif key == "A"
+            elif key == "A":
                 index = 10
-            elif key == "A#"
+            elif key == "A#":
                 index = 11
-            elif key == "B"
+            elif key == "B":
                 index = 12
                 
             self.avgKeyMat.item(keyPressed, self.frameCounter % 20) = 1    #column: key row: counter
