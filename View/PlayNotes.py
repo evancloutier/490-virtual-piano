@@ -1,6 +1,7 @@
 import ReadNotes
 import pygame
 import Notes
+import pdb
 
 class PlayNotes:
     def __init__(self):
@@ -13,8 +14,8 @@ class PlayNotes:
             notesToPlay = []
             notesToRelease = []
             newNotes, releasedNotes = self.readNotes.readNotes()
-            print "new:", newNotes
-            print "released:", releasedNotes
+            #print "new:", newNotes
+            #print "released:", releasedNotes
             for newNote in newNotes:
                 if newNote != "" and len(newNote) != 0:
                     notesToPlay.append(self.musicalNotes.allNotes[newNote])
@@ -23,13 +24,13 @@ class PlayNotes:
                 if releasedNote != "" and len(newNote) != 0:
                     notesToRelease.append(self.musicalNotes.allNotes[releasedNote])
 
-
             for noteToPlay in notesToPlay:
                 self.musicalNotes.addToQueue(noteToPlay)
                 noteToPlay.stop()
                 noteToPlay.play()
 
             for noteToRelease in notesToRelease:
+
                 self.musicalNotes.removeFromQueue(noteToRelease)
                 noteToRelease.stop()
 

@@ -43,7 +43,7 @@ class Notes:
 
 
     def removeFromQueue(self, note):
-        self.noteQueue.remove()
+        self.noteQueue.remove(note)
 
     def getOldestNote(self):
         return self.noteQueue.get()

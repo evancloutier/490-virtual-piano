@@ -5,10 +5,15 @@ class ReadNotes:
     def __init__(self):
         self.fileLocation = "../Model/Keys.txt"
         self.file = None
+        self.notes = []
+        self.newNotes = []
+        self.releasedNotes = []
         self.oldNotes = set()
 
     def readNotes(self):
-        notes = []
+        self.notes = []
+        newNotes = []
+        releasedNotes = []
         if os.path.exists(self.fileLocation):
             self.file = open(self.fileLocation)
 
@@ -17,24 +22,26 @@ class ReadNotes:
                 raw = raw[0]
                 raw = raw[1:-1]
                 raw = raw.replace("'", "")
-                notes = raw.split(",")
-                for idx in range(len(notes)):
-                    notes[idx] = notes[idx].strip()
+                self.notes = raw.split(",")
+                for idx in range(len(self.notes)):
+                    self.notes[idx] = self.notes[idx].strip()
 
+                origNotes = self.notes[:]
+                newNotes = self.getNewNotes(self.notes[:])
+                self.newNotes = newNotes
+                releasedNotes = self.getReleasedNotes(self.notes[:])
+                self.releasedNotes = releasedNotes
+                self.oldNotes = set(origNotes)
             self.file.close()
-        newNotes = self.getNewNotes(notes)
-        releasedNotes = self.getReleasedNotes(notes)
+
         return (newNotes, releasedNotes)
 
     def getNewNotes(self, newNotes):
-        newNotesCopy = newNotes[:]
         newNotes = set(newNotes)
         newNotes = newNotes - self.oldNotes
-        self.oldNotes = set(newNotesCopy)
         return list(newNotes)
 
-    def getReleasedNotes(self, newNotes):
-        newNotes = set(newNotes)
-        releasedNotes = self.oldNotes - newNotes
+    def getReleasedNotes(self, allNotes):
+        allNotes = set(allNotes)
+        releasedNotes = self.oldNotes - allNotes
         return list(releasedNotes)
-
