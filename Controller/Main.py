@@ -80,6 +80,8 @@ class Main:
 
             #check to see if the finger points are being pressed
             keysBeingPressed = self.depthProcessor.checkFingerPoints(depth, keysBeingHovered)
+            
+            self.depthProcessor.calculateNotesMatrix(keysBeingPressed)
 
 
             self.writeNotes.writeKeyNamesToFile(keysBeingPressed)

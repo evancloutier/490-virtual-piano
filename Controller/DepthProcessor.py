@@ -10,6 +10,8 @@ class DepthProcessor:
         self.kinect = kinect
         self.sumDepthValues = np.zeros((424, 512))
         self.depthValues = None
+        self.avgKeyMat = np.zeros((12, 20))
+        self.frameCounter = 0
 
     def initializeDepthMap(self, depth, counter):
         row, col = depth.shape
@@ -26,11 +28,39 @@ class DepthProcessor:
                     prevDepth = self.sumDepthValues.item(index)
                     self.sumDepthValues.itemset(index, (x + prevDepth))
 
-    def calculateThresholdMatrix(self):
-        #get depth threshold at top of key and bottom of key
-        #calculate threshold change / pixel, integrate that with threshold
-        #we know bottomDepthThresh = 13
-        bottomDepthThresh = 13
+    def calculateNotesMatrix(self, keysBeingPressed):
+        
+        for key in keysBeingPressed:
+            if key == "C":
+                index = 1
+            elif key == "C#"
+                index = 2
+            elif key == "D"
+                index = 3
+            elif key == "D#"
+                index = 4
+            elif key == "E"
+                index = 5
+            elif key == "F"
+                index = 6
+            elif key == "F#"
+                index = 7
+            elif key == "G"
+                index = 8
+            elif key == "G#"
+                index = 9            
+            elif key == "A"
+                index = 10
+            elif key == "A#"
+                index = 11
+            elif key == "B"
+                index = 12
+                
+            self.avgKeyMat.item(keyPressed, self.frameCounter % 20) = 1    #column: key row: counter
+            
+        print self.avgKeyMat
+        self.frameCounter = self.frameCounter + 1
+        return c
 
     def checkFingerPoints(self, depthFrame, keysBeingHovered):
         #so we loop through each of points in keysBeingHovered
