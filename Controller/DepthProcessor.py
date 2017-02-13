@@ -24,12 +24,13 @@ class DepthProcessor:
                     self.sumDepthValues.itemset(index, x)
                 else:
                     prevDepth = self.sumDepthValues.item(index)
-                    #print "prevDepth ", prevDepth
-                    #print "x ", x
                     self.sumDepthValues.itemset(index, (x + prevDepth))
 
-    def calculateThresholdMatrix(self, depthFrame):
-        pass
+    def calculateThresholdMatrix(self):
+        #get depth threshold at top of key and bottom of key
+        #calculate threshold change / pixel, integrate that with threshold
+        #we know bottomDepthThresh = 13
+        bottomDepthThresh = 13
 
     def checkFingerPoints(self, depthFrame, keysBeingHovered):
         #so we loop through each of points in keysBeingHovered
@@ -53,7 +54,6 @@ class DepthProcessor:
             if depthDifference < 20:
                 keysBeingPressed.append(key)
 
-        print keysBeingPressed
         return keysBeingPressed
 
 

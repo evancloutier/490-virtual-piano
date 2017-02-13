@@ -21,7 +21,6 @@ class Main:
         self.fingerDetector.buildSkinColorHistogram(self.kinect)
         self.boundsDetector = BoundsDetector.BoundsDetector(self.kinect)
         self.kinect.keyBounds = self.boundsDetector.getROIBounds()
-        # print "key bounds", self.kinect.keyBounds
         self.keyDetector = KeyDetector.KeyDetector(self.kinect, "C")
         self.depthProcessor = DepthProcessor.DepthProcessor(self.kinect)
 
@@ -82,7 +81,6 @@ class Main:
             #check to see if the finger points are being pressed
             keysBeingPressed = self.depthProcessor.checkFingerPoints(depth, keysBeingHovered)
 
-            #print "keys being hovered", keysBeingHovered
 
             self.writeNotes.writeKeyNamesToFile(keysBeingPressed)
 
