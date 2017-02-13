@@ -10,7 +10,6 @@ class DepthProcessor:
         self.kinect = kinect
         self.sumDepthValues = np.zeros((424, 512))
         self.depthValues = None
-        self.avgKeyMat = np.zeros((12, 20))
         self.frameCounter = 0
 
     def initializeDepthMap(self, depth, counter):
@@ -30,37 +29,31 @@ class DepthProcessor:
 
     def calculateNotesMatrix(self, keysBeingPressed):
         
-        for key in keysBeingPressed:
-            if key == "C":
-                index = 1
-            elif key == "C#":
-                index = 2
-            elif key == "D":
-                index = 3
-            elif key == "D#":
-                index = 4
-            elif key == "E":
-                index = 5
-            elif key == "F":
-                index = 6
-            elif key == "F#":
-                index = 7
-            elif key == "G":
-                index = 8
-            elif key == "G#":
-                index = 9            
-            elif key == "A":
-                index = 10
-            elif key == "A#":
-                index = 11
-            elif key == "B":
-                index = 12
+        index = None
+        
+        keyDict = {("C1":(0, False)),("Db1":(1, False)),("D1":(2, False))
+                   ,("Eb1":(3, False)),("E1":(4, False)),("F1":(5, False))
+                   ,("Gb1":(6, False)),("G1":(7, False)),("Ab1":(8, False))
+                   ,("A1":(9, False)),("Bb1":(10, False)),("B1":(11, False))}
+        
+        if keysBeingPressed is not None:
+            for key in keysBeingPressed:
+                index, isPressed = keyDict.get(key, None)
+                keyDict[key] = index, True
                 
-            self.avgKeyMat[keyPressed][self.frameCounter % 20] = 1    #column: key row: counter
             
+
+            for key, value in keyDict:
+                if self.frameCounter >= 20:
+                    self.avgKeyMat[value[0]].popLeft()
+                if value[1] == True:
+                    self.avgKeyMat[value[0]].append(1)
+                elif value[1] == False:
+                    self.avgKegMat[[value[0]]].append(0)
+                
+
         print self.avgKeyMat
         self.frameCounter = self.frameCounter + 1
-        return c
 
     def checkFingerPoints(self, depthFrame, keysBeingHovered):
         #so we loop through each of points in keysBeingHovered
