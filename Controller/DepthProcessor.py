@@ -10,7 +10,7 @@ class DepthProcessor:
         self.kinect = kinect
         self.sumDepthValues = np.zeros((424, 512))
         self.depthValues = None
-        self.avgKeyMat = np.zeros(12)
+        self.avgKeyMat = np.zeros((12,1))
         self.frameCounter = 0
 
     def initializeDepthMap(self, depth, counter):
@@ -51,11 +51,11 @@ class DepthProcessor:
             for key, index in keyDict:
                 isPressed = myList[index]
                 if self.frameCounter >= 20:                    
-                    self.avgKeyMat[index].popLeft()
+                    np.delete(self.avgKeyMat[index], self.avgKeyMat[0][index])
                 if isPressed:
-                    self.avgKeyMat[index].append(1)
+                    np.append(self.avgKeyMat[index], 1)
                 else:
-                    self.avgKegMat[index].append(0)
+                    np.append(self.avgKeyMat[index], 0)
                 
 
         print self.avgKeyMat
