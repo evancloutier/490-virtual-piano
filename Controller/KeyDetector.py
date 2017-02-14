@@ -44,6 +44,7 @@ class KeyDetector:
 
     def assignContourToKey(self, firstNote):
         #sorted from left to right from player perspective
+        self.keys = dict()
         noteNames = ["C","Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B"]
         noteIdx = noteNames.index(firstNote)
 
@@ -55,6 +56,7 @@ class KeyDetector:
 
             noteIdx = (noteIdx + 1) % len(noteNames)
 
+        print "num keys detected:", len(self.keys)
 
 
     def getKeyContours(self):
@@ -83,9 +85,3 @@ class KeyDetector:
                 contours.append(contour)
         contours.sort(key = lambda x: x[1])
         self.contours = contours
-
-    def drawKeys(self, image):
-        cv2.drawContours(image, self.keys["E1"], 0, color=255, thickness=5)
-
-        #for cont in self.contours:
-        #    cv2.drawContours(image, cont, 0, color=255, thickness=5)

@@ -70,20 +70,24 @@ class Main:
 
 
             filteredHandIm = self.kinect.getHandColorFrame(filteredIm)
-            if len(filteredHandIm) > 0 and len(filteredHandIm[0]) > 0:
-
-                cv2.imshow("filtered hand im", filteredHandIm)
+            #if len(filteredHandIm) > 0 and len(filteredHandIm[0]) > 0:
+            #    cv2.imshow("filtered hand im", filteredHandIm)
 
             fingerIm, fingerPoints = self.fingerDetector.getFingerPositions(filteredHandIm, x1, y1)
 
             keysBeingHovered = self.fingerMapper.getKeysBeingHovered(fingerPoints, self.keyDetector.keys)
 
+            #print "keys being hovered:", keysBeingHovered
+
             #check to see if the finger points are being pressed
             keysBeingPressed = self.depthProcessor.checkFingerPoints(depth, keysBeingHovered)
 
+            #print "keys being pressed without matrix:", keysBeingPressed
+
+
             keysBeingPressed = self.depthProcessor.calculateNotesMatrix(keysBeingPressed)
 
-            print keysBeingPressed
+            print "keys being pressed with matrix:", keysBeingPressed
 
             self.writeNotes.writeKeyNamesToFile(keysBeingPressed)
 
@@ -97,10 +101,8 @@ class Main:
                     cv2.circle(color, (point[0], point[1]), 4, color=(255,255,0), thickness=3)
 
 
-
-
-            cv2.imshow("color", color)
-            cv2.imshow("depth", depth / 4500.)
+            #cv2.imshow("color", color)
+            #cv2.imshow("depth", depth / 4500.)
             #cv2.imshow("Average depth value", self.depthProcessor.depthValues)
 
             #handDepthFrame = self.kinect.getHandDepthFrame(color, depth)

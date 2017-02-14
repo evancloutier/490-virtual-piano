@@ -10,11 +10,19 @@ class DepthProcessor:
         self.kinect = kinect
         self.sumDepthValues = np.zeros((424, 512))
         self.depthValues = None
-        self.avgKeyMat = {"C1": [0],"Db1": [0],"D1": [0]
-                          ,"Eb1": [0],"E1": [0],"F1": [0]
-                          ,"Gb1": [0],"G1": [0],"Ab1": [0]
-                          ,"A1": [0],"Bb1": [0],"B1": [0]}
+        self.avgKeyMat = self.buildAverageKeyMat()
         self.frameCounter = 0
+
+    def buildAverageKeyMat(self):
+        keys = {"C1": [0],"Db1": [0],"D1": [0]
+               ,"Eb1": [0],"E1": [0],"F1": [0]
+               ,"Gb1": [0],"G1": [0],"Ab1": [0]
+               ,"A1": [0],"Bb1": [0],"B1": [0]
+               ,"C2": [0],"Db2": [0],"D2": [0]
+               ,"Eb2": [0],"E2": [0],"F2": [0]
+               ,"Gb2": [0],"G2": [0],"Ab2": [0]
+               ,"A2": [0],"Bb2": [0],"B2": [0]}
+        return keys
 
     def initializeDepthMap(self, depth, counter):
         row, col = depth.shape
@@ -52,8 +60,6 @@ class DepthProcessor:
         return notes
 
 
-
-
     def checkFingerPoints(self, depthFrame, keysBeingHovered):
         #so we loop through each of points in keysBeingHovered
         #convert that point to depth point
@@ -73,7 +79,7 @@ class DepthProcessor:
             depthDifference = self.depthValues.item(depthPointY, depthPointX) - depthFrame.item(depthPointY, depthPointX)
             print depthDifference
 
-            if depthDifference < 20:
+            if depthDifference < 15:
                 keysBeingPressed.append(key)
 
         return keysBeingPressed

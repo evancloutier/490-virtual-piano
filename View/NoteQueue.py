@@ -31,11 +31,12 @@ class NoteQueue:
 
     def get(self):
         note = None
+        noteToDel = None
         if self.size > 0:
             for key in self.noteQueue:
                 if self.noteQueue[key] == 1:
-                    note = key
-                    del self.noteQueue[key]
+                    noteToDel = key
+            del self.noteQueue[noteToDel]
             for key in self.noteQueue:
                 self.noteQueue[key] -= 1
             self.size -= 1

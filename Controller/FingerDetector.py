@@ -138,7 +138,7 @@ class FingerDetector:
         backProject = filteredIm.copy()
         backProject = cv2.medianBlur(backProject, self.blurPixelSize)
 
-        cv2.imshow("Back Projection", backProject)
+        #cv2.imshow("Back Projection", backProject)
 
         filteredIm = self.blurFrame(filteredIm, self.blurPixelSize)
         hand = self.getLargestShapes(filteredIm)[0]
@@ -508,7 +508,7 @@ class FingerDetector:
                                 handWidth += 1
                     handWidth += 1
                     self.handWidth = handWidth
-                    self.drawCenterOfHand(frameToDraw, centerOfHand, color=0, width=2*handWidth/3, thickness=-1)
+                    self.drawCenterOfHand(frameToDraw, centerOfHand, color=0, width=3*handWidth/2, thickness=-1)
 
     def drawFingerPoints(self, frame, fingerPoints):
         if fingerPoints is not None:
