@@ -39,7 +39,7 @@ class Main:
 
             k = cv2.waitKey(10)
 
-            if k == 27:
+            if k == 27 or k == 1048603:
                 cv2.destroyAllWindows()
                 self.kinect.exit()
                 break
@@ -49,6 +49,11 @@ class Main:
         self.depthProcessor.depthValues = self.depthProcessor.sumDepthValues / tens
         print np.amax(self.depthProcessor.sumDepthValues)
         print np.amax(self.depthProcessor.depthValues)
+        frame = self.kinect.getFrame()
+        frames = self.kinect.frames
+        self.depthProcessor.buildNormalizedThresholdMatrix(frames["depth"])
+        self.kinect.releaseFrame()
+
         end = time.time()
         print "Done initializing, took ", end - start, "seconds"
 
@@ -77,7 +82,7 @@ class Main:
 
             keysBeingHovered = self.fingerMapper.getKeysBeingHovered(fingerPoints, self.keyDetector.keys)
 
-            #print "keys being hovered:", keysBeingHovered
+            print "keys being hovered:", keysBeingHovered
 
             #check to see if the finger points are being pressed
             keysBeingPressed = self.depthProcessor.checkFingerPoints(depth, keysBeingHovered)
@@ -102,18 +107,19 @@ class Main:
 
 
             #cv2.imshow("color", color)
+            #cv2.imshow("normalized", self.depthProcessor.normalizedThresholdMatrix)
             #cv2.imshow("depth", depth / 4500.)
-            #cv2.imshow("Average depth value", self.depthProcessor.depthValues)
+            ##cv2.imshow("Average depth value", self.depthProcessor.depthValues)
 
-            #handDepthFrame = self.kinect.getHandDepthFrame(color, depth)
-            #handDepthColorMap = self.depthProcessor.processDepthFrame(handDepthFrame)
+            ##handDepthFrame = self.kinect.getHandDepthFrame(color, depth)
+            ##handDepthColorMap = self.depthProcessor.processDepthFrame(handDepthFrame)
 
 
             self.kinect.releaseFrame()
 
             k = cv2.waitKey(10)
 
-            if k == 27:
+            if k == 27 or k == 1048603:
                 cv2.destroyAllWindows()
                 self.kinect.exit()
                 break

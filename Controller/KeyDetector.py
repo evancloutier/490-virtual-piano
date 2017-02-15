@@ -22,7 +22,7 @@ class KeyDetector:
 
             k = cv2.waitKey(10)
 
-            if k == 27:
+            if k == 27 or k == 1048603:
                 cv2.destroyAllWindows()
                 break
             elif k == ord('q'):

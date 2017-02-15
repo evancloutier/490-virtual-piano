@@ -12,6 +12,7 @@ class DepthProcessor:
         self.depthValues = None
         self.avgKeyMat = self.buildAverageKeyMat()
         self.frameCounter = 0
+        self.normalizedThresholdMatrix = np.ones((424, 512))
 
     def buildAverageKeyMat(self):
         keys = {"C1": [0],"Db1": [0],"D1": [0]
@@ -38,6 +39,37 @@ class DepthProcessor:
                 else:
                     prevDepth = self.sumDepthValues.item(index)
                     self.sumDepthValues.itemset(index, (x + prevDepth))
+
+    def getClosestPixelToGeometricOrigin(self, depthFrame, height, width):
+        closestPixelsToGeometricOrigin = (0,0)
+        minDist = float("inf")
+
+        for y in xrange(height):
+            for x in xrange(width):
+                xGeo, yGeo, zGeo = self.kinect.registration.getPointXYZ(depthFrame, y, x)
+                if math.isnan(xGeo) or math.isnan(yGeo):
+                    continue
+                dist = xGeo ** 2 + yGeo ** 2
+                if dist < minDist:
+                    minDist = dist
+                    closestPixelsToGeometricOrigin = (x, y)
+
+        return closestPixelsToGeometricOrigin
+
+    def buildNormalizedThresholdMatrix(self, depthFrame):
+        depth = depthFrame.asarray()
+        height, width = depth.shape
+        centerX, centerY = self.getClosestPixelToGeometricOrigin(depthFrame, height, width)
+        x, y, baseZGeo = self.kinect.registration.getPointXYZ(depthFrame, centerY, centerX)
+
+        for y in xrange(height):
+            for x in xrange(width):
+                xGeo, yGeo, zGeo = self.kinect.registration.getPointXYZ(depthFrame, y, x)
+                if math.isnan(xGeo) or math.isnan(yGeo):
+                    continue
+                threshRatio = float(baseZGeo) / zGeo
+                self.normalizedThresholdMatrix.itemset((y, x), threshRatio)
+
 
     def calculateNotesMatrix(self, keysBeingPressed):
 
@@ -66,6 +98,7 @@ class DepthProcessor:
         #check that depth point value with self.depthValues point
 
         keysBeingPressed = []
+        depthThresh = 11
 
         for key in keysBeingHovered:
             colorPoint = keysBeingHovered[key]
@@ -79,7 +112,7 @@ class DepthProcessor:
             depthDifference = self.depthValues.item(depthPointY, depthPointX) - depthFrame.item(depthPointY, depthPointX)
             print depthDifference
 
-            if depthDifference < 15:
+            if depthDifference < depthThresh * self.normalizedThresholdMatrix.item(depthPointY, depthPointX):
                 keysBeingPressed.append(key)
 
         return keysBeingPressed

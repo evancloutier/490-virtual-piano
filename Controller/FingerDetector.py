@@ -124,7 +124,8 @@ class FingerDetector:
             kinect.releaseFrame()
 
             k = cv2.waitKey(10)
-            if k == 27:
+            print "k:", k
+            if k == 27 or k == 1048603:
                 self.hist = self.getHandColors(originalFrame, samplePoints)
                 cv2.destroyAllWindows()
                 break
@@ -508,7 +509,7 @@ class FingerDetector:
                                 handWidth += 1
                     handWidth += 1
                     self.handWidth = handWidth
-                    self.drawCenterOfHand(frameToDraw, centerOfHand, color=0, width=3*handWidth/2, thickness=-1)
+                    self.drawCenterOfHand(frameToDraw, centerOfHand, color=0, width=int(handWidth), thickness=-1)
 
     def drawFingerPoints(self, frame, fingerPoints):
         if fingerPoints is not None:

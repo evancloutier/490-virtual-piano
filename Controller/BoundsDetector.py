@@ -24,7 +24,7 @@ class BoundsDetector:
             self.kinect.releaseFrame()
             k = cv2.waitKey(10)
 
-            if k == 27:
+            if k == 27 or k == 1048603:
                 cv2.destroyAllWindows()
                 break
             elif k == ord('q'):
@@ -85,7 +85,7 @@ class BoundsDetector:
 
     def getROIBounds(self):
         x, y, w, h = cv2.boundingRect(self.largestContour)
-        return self.getROIPoints(x, y, x + w, y + h, 0.3)
+        return self.getROIPoints(x, y, x + w, y + h, 0.2)
 
     def getBoundingBoxOfHand(self, hand):
         if hand is None or type(hand) != np.ndarray:
