@@ -184,35 +184,35 @@ class Main:
                 if self.keyThreshold[3] < 10:
                     self.keyThreshold[3] += 0.05
                     print "Key Threshold 3: {0}".format(self.keyThreshold[3])
-            elif k == ord('y'):
+            elif k == ord('y') or k == 1048697:
                 if self.keyThreshold[4] > 0:
                     self.keyThreshold[4] -= 0.05
                     print "Key Threshold 4: {0}".format(self.keyThreshold[4])
-            elif k == ord('u'):
+            elif k == ord('u') or k == 1048693:
                 if self.keyThreshold[4] < 10:
                     self.keyThreshold[4] += 0.05
                     print "Key Threshold 4: {0}".format(self.keyThreshold[4])
-            elif k == ord('i'):
+            elif k == ord('i') or k == 1048681:
                 if self.keyThreshold[5] > 0:
                     self.keyThreshold[5] -= 0.05
                     print "Key Threshold 5: {0}".format(self.keyThreshold[5])
-            elif k == ord('o'):
+            elif k == ord('o') or k == 1048687:
                 if self.keyThreshold[5] < 10:
                     self.keyThreshold[5] += 0.05
                     print "Key Threshold 5: {0}".format(self.keyThreshold[5])
-            elif k == ord('h'):
+            elif k == ord('h') or k == 1048680:
                 if self.keyThreshold[6] > 0:
                     self.keyThreshold[6] -= 0.05
                     print "Key Threshold 5: {0}".format(self.keyThreshold[6])
-            elif k == ord('j'):
+            elif k == ord('j') or k == 1048682:
                 if self.keyThreshold[6] < 10:
                     self.keyThreshold[6] += 0.05
                     print "Key Threshold 6: {0}".format(self.keyThreshold[6])
-            elif k == ord('k'):
+            elif k == ord('k') or k == 1048683:
                 if self.keyThreshold[7] > 0:
                     self.keyThreshold[7] -= 0.05
                     print "Key Threshold 7: {0}".format(self.keyThreshold[7])
-            elif k == ord('l'):
+            elif k == ord('l') or k == 1048684:
                 if self.keyThreshold[7] < 10:
                     self.keyThreshold[7] += 0.05
                     print "Key Threshold 6: {0}".format(self.keyThreshold[7])
