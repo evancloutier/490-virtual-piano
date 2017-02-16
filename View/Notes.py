@@ -103,6 +103,32 @@ class Notes:
         self.xylophoneBb6 = pygame.mixer.Sound("Xylophone/Bb6.wav")
         self.xylophoneB6 = pygame.mixer.Sound("Xylophone/B6.wav")
 
+        self.trumpetC5 = pygame.mixer.Sound("Trumpet/C5.wav")
+        self.trumpetDb5 = pygame.mixer.Sound("Trumpet/Db5.wav")
+        self.trumpetD5 = pygame.mixer.Sound("Trumpet/D5.wav")
+        self.trumpetEb5 = pygame.mixer.Sound("Trumpet/Eb5.wav")
+        self.trumpetE5 = pygame.mixer.Sound("Trumpet/E5.wav")
+        self.trumpetF5 = pygame.mixer.Sound("Trumpet/F5.wav")
+        self.trumpetGb5 = pygame.mixer.Sound("Trumpet/Gb5.wav")
+        self.trumpetG5 = pygame.mixer.Sound("Trumpet/G5.wav")
+        self.trumpetAb5 = pygame.mixer.Sound("Trumpet/Ab5.wav")
+        self.trumpetA5 = pygame.mixer.Sound("Trumpet/A5.wav")
+        self.trumpetBb5 = pygame.mixer.Sound("Trumpet/Bb5.wav")
+        self.trumpetB5 = pygame.mixer.Sound("Trumpet/B5.wav")
+
+        self.trumpetC6 = pygame.mixer.Sound("Trumpet/C6.wav")
+        self.trumpetDb6 = pygame.mixer.Sound("Trumpet/Db6.wav")
+        self.trumpetD6 = pygame.mixer.Sound("Trumpet/D6.wav")
+        self.trumpetEb6 = pygame.mixer.Sound("Trumpet/Eb6.wav")
+        self.trumpetE6 = pygame.mixer.Sound("Trumpet/E6.wav")
+        self.trumpetF6 = pygame.mixer.Sound("Trumpet/F6.wav")
+        self.trumpetGb6 = pygame.mixer.Sound("Trumpet/Gb6.wav")
+        self.trumpetG6 = pygame.mixer.Sound("Trumpet/G6.wav")
+        self.trumpetAb6 = pygame.mixer.Sound("Trumpet/Ab6.wav")
+        self.trumpetA6 = pygame.mixer.Sound("Trumpet/A6.wav")
+        self.trumpetBb6 = pygame.mixer.Sound("Trumpet/Bb6.wav")
+        self.trumpetB6 = pygame.mixer.Sound("Trumpet/B6.wav")
+
         self.allPianoNotes = [self.pianoC3, self.pianoDb3, self.pianoD3, self.pianoEb3, self.pianoE3, self.pianoF3, self.pianoGb3, self.pianoG3, self.pianoAb3, self.pianoA3, self.pianoBb3, self.pianoB3,
                               self.pianoC4, self.pianoDb4, self.pianoD4, self.pianoEb4, self.pianoE4, self.pianoF4, self.pianoGb4, self.pianoG4, self.pianoAb4, self.pianoA4, self.pianoBb4, self.pianoB4,
                               self.pianoC5, self.pianoDb5, self.pianoD5, self.pianoEb5, self.pianoE5, self.pianoF5, self.pianoGb5, self.pianoG5, self.pianoAb5, self.pianoA5, self.pianoBb5, self.pianoB5,
@@ -110,6 +136,10 @@ class Notes:
 
         self.allXylophoneNotes = [self.xylophoneC5, self.xylophoneDb5, self.xylophoneD5, self.xylophoneEb5, self.xylophoneE5, self.xylophoneF5, self.xylophoneGb5, self.xylophoneG5, self.xylophoneAb5, self.xylophoneA5, self.xylophoneBb5, self.xylophoneB5,
                                   self.xylophoneC6, self.xylophoneDb6, self.xylophoneD6, self.xylophoneEb6, self.xylophoneE6, self.xylophoneF6, self.xylophoneGb6, self.xylophoneG6, self.xylophoneAb6, self.xylophoneA6, self.xylophoneBb6, self.xylophoneB6]
+
+        self.allTrumpetNotes = [self.trumpetC5, self.trumpetDb5, self.trumpetD5, self.trumpetEb5, self.trumpetE5, self.trumpetF5, self.trumpetGb5, self.trumpetG5, self.trumpetAb5, self.trumpetA5, self.trumpetBb5, self.trumpetB5,
+                                  self.trumpetC6, self.trumpetDb6, self.trumpetD6, self.trumpetEb6, self.trumpetE6, self.trumpetF6, self.trumpetGb6, self.trumpetG6, self.trumpetAb6, self.trumpetA6, self.trumpetBb6, self.trumpetB6]
+
 
         self.allNotes = dict()
         self.noteQueue = NoteQueue.NoteQueue()
@@ -131,12 +161,20 @@ class Notes:
                     self.allNotes[baseNote] = instrumentNote
 
         elif instrument == "Xylophone":
-            print "yea we hur"
             if octave == 5:
                 self.allNotes = dict()
                 octaveIdx = 0
                 for baseNote, instrumentNote in zip(self.baseNotes, self.allXylophoneNotes[octaveIdx * 12:]):
                     self.allNotes[baseNote] = instrumentNote
+
+        elif instrument == "Trumpet":
+            if octave == 5:
+                self.allNotes = dict()
+                octaveIdx = 0
+                for baseNote, instrumentNote in zip(self.baseNotes, self.allTrumpetNotes[octaveIdx * 12:]):
+                    self.allNotes[baseNote] = instrumentNote
+
+
 
 
 

@@ -28,6 +28,12 @@ class PlayNotes:
                 self.musicalNotes.buildAllNotesFromInstrumentAndOctave(alexaFeedback, 5)
                 self.musicalNotes.currInstrument = "Xylophone"
 
+        elif alexaFeedback == "Trumpet":
+            if self.musicalNotes.currInstrument != "Trumpet":
+                self.musicalNotes.buildAllNotesFromInstrumentAndOctave(alexaFeedback, 5)
+                self.musicalNotes.currInstrument = "Trumpet"
+
+
 
     def playNotes(self):
         while True:
