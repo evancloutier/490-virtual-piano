@@ -10,28 +10,32 @@ class PlayNotes:
         self.prevNotes = set()
 
     def updateInstrument(self, alexaFeedback):
+        if len(alexaFeedback) > 0:
+            alexaFeedback = alexaFeedback[0].upper() + alexaFeedback[1:]
+            print alexaFeedback
         if alexaFeedback == "Up":
             self.musicalNotes.buildAllNotesFromInstrumentAndOctave(self.musicalNotes.currInstrument, self.musicalNotes.currOctave + 1)
-            self.musicalNotes.currOctave += 1
 
         elif alexaFeedback == "Down":
             self.musicalNotes.buildAllNotesFromInstrumentAndOctave(self.musicalNotes.currInstrument, self.musicalNotes.currOctave - 1)
-            self.musicalNotes.currOctave -= 1
 
         elif alexaFeedback == "Piano":
             if self.musicalNotes.currInstrument != "Piano":
-                self.musicalNotes.buildAllNotesFromInstrumentAndOctave(alexaFeedback, 5)
+                self.musicalNotes.currOctave = 4
                 self.musicalNotes.currInstrument = "Piano"
+                self.musicalNotes.buildAllNotesFromInstrumentAndOctave(alexaFeedback, 4)
 
         elif alexaFeedback == "Xylophone":
             if self.musicalNotes.currInstrument != "Xylophone":
-                self.musicalNotes.buildAllNotesFromInstrumentAndOctave(alexaFeedback, 5)
+                self.musicalNotes.currOctave = 5
                 self.musicalNotes.currInstrument = "Xylophone"
+                self.musicalNotes.buildAllNotesFromInstrumentAndOctave(alexaFeedback, 5)
 
         elif alexaFeedback == "Trumpet":
             if self.musicalNotes.currInstrument != "Trumpet":
-                self.musicalNotes.buildAllNotesFromInstrumentAndOctave(alexaFeedback, 5)
+                self.musicalNotes.currOctave = 4
                 self.musicalNotes.currInstrument = "Trumpet"
+                self.musicalNotes.buildAllNotesFromInstrumentAndOctave(alexaFeedback, 4)
 
 
 
@@ -40,6 +44,7 @@ class PlayNotes:
             notesToPlay = []
             notesToRelease = []
             newNotes, releasedNotes = self.readNotes.readNotes()
+            print "new notes:", newNotes
             alexaFeedback = self.readNotes.readAlexa()
             self.updateInstrument(alexaFeedback)
 

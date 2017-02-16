@@ -21,6 +21,7 @@ class ReadNotes:
                 data = raw.strip()
                 self.alexaFile.close()
                 open(self.alexaFileLoc, 'w').close()
+                print "from alexa file:", data
                 return data
 
             self.alexaFile.close()

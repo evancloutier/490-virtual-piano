@@ -116,18 +116,18 @@ class Notes:
         self.trumpetBb5 = pygame.mixer.Sound("Trumpet/Bb5.wav")
         self.trumpetB5 = pygame.mixer.Sound("Trumpet/B5.wav")
 
-        self.trumpetC6 = pygame.mixer.Sound("Trumpet/C6.wav")
-        self.trumpetDb6 = pygame.mixer.Sound("Trumpet/Db6.wav")
-        self.trumpetD6 = pygame.mixer.Sound("Trumpet/D6.wav")
-        self.trumpetEb6 = pygame.mixer.Sound("Trumpet/Eb6.wav")
-        self.trumpetE6 = pygame.mixer.Sound("Trumpet/E6.wav")
-        self.trumpetF6 = pygame.mixer.Sound("Trumpet/F6.wav")
-        self.trumpetGb6 = pygame.mixer.Sound("Trumpet/Gb6.wav")
-        self.trumpetG6 = pygame.mixer.Sound("Trumpet/G6.wav")
-        self.trumpetAb6 = pygame.mixer.Sound("Trumpet/Ab6.wav")
-        self.trumpetA6 = pygame.mixer.Sound("Trumpet/A6.wav")
-        self.trumpetBb6 = pygame.mixer.Sound("Trumpet/Bb6.wav")
-        self.trumpetB6 = pygame.mixer.Sound("Trumpet/B6.wav")
+        self.trumpetC4 = pygame.mixer.Sound("Trumpet/C4.wav")
+        self.trumpetDb4 = pygame.mixer.Sound("Trumpet/Db4.wav")
+        self.trumpetD4 = pygame.mixer.Sound("Trumpet/D4.wav")
+        self.trumpetEb4 = pygame.mixer.Sound("Trumpet/Eb4.wav")
+        self.trumpetE4 = pygame.mixer.Sound("Trumpet/E4.wav")
+        self.trumpetF4 = pygame.mixer.Sound("Trumpet/F4.wav")
+        self.trumpetGb4 = pygame.mixer.Sound("Trumpet/Gb4.wav")
+        self.trumpetG4 = pygame.mixer.Sound("Trumpet/G4.wav")
+        self.trumpetAb4 = pygame.mixer.Sound("Trumpet/Ab4.wav")
+        self.trumpetA4 = pygame.mixer.Sound("Trumpet/A4.wav")
+        self.trumpetBb4 = pygame.mixer.Sound("Trumpet/Bb4.wav")
+        self.trumpetB4 = pygame.mixer.Sound("Trumpet/B4.wav")
 
         self.allPianoNotes = [self.pianoC3, self.pianoDb3, self.pianoD3, self.pianoEb3, self.pianoE3, self.pianoF3, self.pianoGb3, self.pianoG3, self.pianoAb3, self.pianoA3, self.pianoBb3, self.pianoB3,
                               self.pianoC4, self.pianoDb4, self.pianoD4, self.pianoEb4, self.pianoE4, self.pianoF4, self.pianoGb4, self.pianoG4, self.pianoAb4, self.pianoA4, self.pianoBb4, self.pianoB4,
@@ -138,7 +138,7 @@ class Notes:
                                   self.xylophoneC6, self.xylophoneDb6, self.xylophoneD6, self.xylophoneEb6, self.xylophoneE6, self.xylophoneF6, self.xylophoneGb6, self.xylophoneG6, self.xylophoneAb6, self.xylophoneA6, self.xylophoneBb6, self.xylophoneB6]
 
         self.allTrumpetNotes = [self.trumpetC5, self.trumpetDb5, self.trumpetD5, self.trumpetEb5, self.trumpetE5, self.trumpetF5, self.trumpetGb5, self.trumpetG5, self.trumpetAb5, self.trumpetA5, self.trumpetBb5, self.trumpetB5,
-                                  self.trumpetC6, self.trumpetDb6, self.trumpetD6, self.trumpetEb6, self.trumpetE6, self.trumpetF6, self.trumpetGb6, self.trumpetG6, self.trumpetAb6, self.trumpetA6, self.trumpetBb6, self.trumpetB6]
+                                  self.trumpetC4, self.trumpetDb4, self.trumpetD4, self.trumpetEb4, self.trumpetE4, self.trumpetF4, self.trumpetGb4, self.trumpetG4, self.trumpetAb4, self.trumpetA4, self.trumpetBb4, self.trumpetB4]
 
 
         self.allNotes = dict()
@@ -152,13 +152,15 @@ class Notes:
 
 
     def buildAllNotesFromInstrumentAndOctave(self, instrument, octave):
+        print "octave", octave
+        print "instrument", instrument
         if instrument == "Piano":
             if octave >= 3 and octave <= 5:
                 self.allNotes = dict()
                 octaveIdx = octave - 3
-
                 for baseNote, instrumentNote in zip(self.baseNotes, self.allPianoNotes[octaveIdx * 12:]):
                     self.allNotes[baseNote] = instrumentNote
+                self.currOctave = octave
 
         elif instrument == "Xylophone":
             if octave == 5:
@@ -167,8 +169,9 @@ class Notes:
                 for baseNote, instrumentNote in zip(self.baseNotes, self.allXylophoneNotes[octaveIdx * 12:]):
                     self.allNotes[baseNote] = instrumentNote
 
+
         elif instrument == "Trumpet":
-            if octave == 5:
+            if octave == 4:
                 self.allNotes = dict()
                 octaveIdx = 0
                 for baseNote, instrumentNote in zip(self.baseNotes, self.allTrumpetNotes[octaveIdx * 12:]):
