@@ -15,7 +15,7 @@ class Main:
         blurSize = 7
         threshVal = 159
 
-        self.keyThreshold = 10
+        self.keyThreshold = [1, 1, 1, 1]
         self.writeNotes = WriteNotes.WriteNotes()
         self.fingerMapper = FingerMapper.FingerMapper()
         self.fingerDetector = FingerDetector.FingerDetector(blurSize, threshVal, False, self.kinect)
@@ -139,17 +139,37 @@ class Main:
                 self.kinect.exit()
                 break
             elif k == ord('q') or k == 1048689:
-                if self.keyThreshold > 5:
-                    self.keyThreshold -= 0.2
-                    print "Key Threshold: {0}".format(self.keyThreshold)
+                if self.keyThreshold[0] > 0:
+                    self.keyThreshold[0] -= 0.05
+                    print "Key Threshold 0: {0}".format(self.keyThreshold[0])
             elif k == ord('w') or k == 1048695:
-                if self.keyThreshold < 20:
-                    self.keyThreshold += 0.2
-                    print "Key Threshold: {0}".format(self.keyThreshold)
-
-            #else:
-            #    self.fingerDetector.adjustParams(k)
-
+                if self.keyThreshold[0] < 10:
+                    self.keyThreshold[0] += 0.05
+                    print "Key Threshold 0: {0}".format(self.keyThreshold[0])
+            elif k == ord('e') or k == 1048677:
+                if self.keyThreshold[1] > 0:
+                    self.keyThreshold[1] -= 0.05
+                    print "Key Threshold 1: {0}".format(self.keyThreshold[1])
+            elif k == ord('r') or k == 1048690:
+                if self.keyThreshold[1] < 10:
+                    self.keyThreshold[1] += 0.05
+                    print "Key Threshold 1: {0}".format(self.keyThreshold[1])
+            elif k == ord('a') or k == 1048673:
+                if self.keyThreshold[2] > 0:
+                    self.keyThreshold[2] -= 0.05
+                    print "Key Threshold 2: {0}".format(self.keyThreshold[2])
+            elif k == ord('s') or k == 1048691:
+                if self.keyThreshold[2] < 10:
+                    self.keyThreshold[2] += 0.05
+                    print "Key Threshold 0: {0}".format(self.keyThreshold[2])
+            elif k == ord('d') or k == 1048676:
+                if self.keyThreshold[3] > 0:
+                    self.keyThreshold[3] -= 0.05
+                    print "Key Threshold 2: {0}".format(self.keyThreshold[3])
+            elif k == ord('f') or k == 1048678:
+                if self.keyThreshold[3] < 10:
+                    self.keyThreshold[3] += 0.05
+                    print "Key Threshold 0: {0}".format(self.keyThreshold[3])
 
 
 main = Main()

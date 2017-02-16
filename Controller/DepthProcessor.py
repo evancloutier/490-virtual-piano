@@ -93,12 +93,14 @@ class DepthProcessor:
         return notes
 
 
-    def checkFingerPoints(self, depthFrame, keysBeingHovered, keyThreshold):
+    def checkFingerPoints(self, depthFrame, keysBeingHovered, thresholdList):
         #so we loop through each of points in keysBeingHovered
         #convert that point to depth point
         #check that depth point value with self.depthValues point
 
         keysBeingPressed = []
+        height, width = depthFrame.shape
+        quadrantWidth = height / 4
 
         for key in keysBeingHovered:
             colorPoint = keysBeingHovered[key]
@@ -112,10 +114,8 @@ class DepthProcessor:
             depthDifference = self.depthValues.item(depthPointY, depthPointX) - depthFrame.item(depthPointY, depthPointX)
             print depthDifference
 
-            if depthDifference < keyThreshold * self.normalizedThresholdMatrix.item(depthPointY, depthPointX):
+            if depthDifference < keyThreshold * self.normalizedThresholdMatrix.item(depthPointY, depthPointX) * thresholdList[int(depthPointX / 128)]:
                 keysBeingPressed.append(key)
-
-
         return keysBeingPressed
 
 
