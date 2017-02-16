@@ -105,7 +105,15 @@ class Main:
                                 cv2.imshow("second finger im", f2)
                 hand = self.fingerDetector.hand2
 
-            # cv2.putText(depth, str(self.keyThreshold[0]), (32, 212), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
+            # Move this garbage into a function
+            cv2.putText(depth, str(self.keyThreshold[0]), (30, 212), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
+            cv2.putText(depth, str(self.keyThreshold[1]), (96, 212), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
+            cv2.putText(depth, str(self.keyThreshold[2]), (160, 212), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
+            cv2.putText(depth, str(self.keyThreshold[3]), (226, 212), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
+            cv2.putText(depth, str(self.keyThreshold[4]), (292, 212), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
+            cv2.putText(depth, str(self.keyThreshold[5]), (358, 212), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
+            cv2.putText(depth, str(self.keyThreshold[6]), (424, 212), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
+            cv2.putText(depth, str(self.keyThreshold[7]), (490, 212), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
 
             cv2.rectangle(depth, (0, 0), (64, 424), (0, 255, 0), 3)
             cv2.rectangle(depth, (64, 0), ((64 * 2), 424), (0, 255, 0), 3)
