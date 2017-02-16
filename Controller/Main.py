@@ -15,7 +15,7 @@ class Main:
         blurSize = 7
         threshVal = 159
 
-        self.keyThreshold = [1, 1, 1, 1]
+        self.keyThreshold = [1] * 8
         self.writeNotes = WriteNotes.WriteNotes()
         self.fingerMapper = FingerMapper.FingerMapper()
         self.fingerDetector = FingerDetector.FingerDetector(blurSize, threshVal, False, self.kinect)
@@ -105,14 +105,16 @@ class Main:
                                 cv2.imshow("second finger im", f2)
                 hand = self.fingerDetector.hand2
 
-            cv2.rectangle(depth, (0, 0), (128, 424), (0, 255, 0), 3)
-            cv2.putText(depth, str(self.keyThreshold[0]), (64, 212), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
-            cv2.rectangle(depth, (128, 0), ((128 * 2), 424), (0, 255, 0), 3)
-            cv2.putText(depth, str( self.keyThreshold[1]), ((64 * 2), 212), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
-            cv2.rectangle(depth, ((128 * 2), 0), ((128 * 3), 424), (0, 255, 0), 3)
-            cv2.putText(depth, str(self.keyThreshold[2]), ((64 * 3), 212), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
-            cv2.rectangle(depth, ((128 * 3), 0), ((128 * 4), 424), (0, 255, 0), 3)
-            cv2.putText(depth, str(self.keyThreshold[3]), ((64 * 4), 212), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
+            # cv2.putText(depth, str(self.keyThreshold[0]), (32, 212), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
+
+            cv2.rectangle(depth, (0, 0), (64, 424), (0, 255, 0), 3)
+            cv2.rectangle(depth, (64, 0), ((64 * 2), 424), (0, 255, 0), 3)
+            cv2.rectangle(depth, ((64 * 2), 0), ((64 * 3), 424), (0, 255, 0), 3)
+            cv2.rectangle(depth, ((64 * 3), 0), ((64 * 4), 424), (0, 255, 0), 3)
+            cv2.rectangle(depth, ((64 * 4), 0), ((64 * 5), 424), (0, 255, 0), 3)
+            cv2.rectangle(depth, ((64 * 5), 0), ((64 * 6), 424), (0, 255, 0), 3)
+            cv2.rectangle(depth, ((64 * 6), 0), ((64 * 7), 424), (0, 255, 0), 3)
+            cv2.rectangle(depth, ((64 * 7), 0), ((64 * 8), 424), (0, 255, 0), 3)
 
             cv2.imshow("Depth", depth / 4500.)
             cv2.imshow("Filtered Image", filteredIm)
@@ -173,16 +175,47 @@ class Main:
             elif k == ord('s') or k == 1048691:
                 if self.keyThreshold[2] < 10:
                     self.keyThreshold[2] += 0.05
-                    print "Key Threshold 0: {0}".format(self.keyThreshold[2])
+                    print "Key Threshold 2: {0}".format(self.keyThreshold[2])
             elif k == ord('d') or k == 1048676:
                 if self.keyThreshold[3] > 0:
                     self.keyThreshold[3] -= 0.05
-                    print "Key Threshold 2: {0}".format(self.keyThreshold[3])
+                    print "Key Threshold 3: {0}".format(self.keyThreshold[3])
             elif k == ord('f') or k == 1048678:
                 if self.keyThreshold[3] < 10:
                     self.keyThreshold[3] += 0.05
-                    print "Key Threshold 0: {0}".format(self.keyThreshold[3])
-
+                    print "Key Threshold 3: {0}".format(self.keyThreshold[3])
+            elif k == ord('y'):
+                if self.keyThreshold[4] > 0:
+                    self.keyThreshold[4] -= 0.05
+                    print "Key Threshold 4: {0}".format(self.keyThreshold[4])
+            elif k == ord('u'):
+                if self.keyThreshold[4] < 10:
+                    self.keyThreshold[4] += 0.05
+                    print "Key Threshold 4: {0}".format(self.keyThreshold[4])
+            elif k == ord('i'):
+                if self.keyThreshold[5] > 0:
+                    self.keyThreshold[5] -= 0.05
+                    print "Key Threshold 5: {0}".format(self.keyThreshold[5])
+            elif k == ord('o'):
+                if self.keyThreshold[5] < 10:
+                    self.keyThreshold[5] += 0.05
+                    print "Key Threshold 5: {0}".format(self.keyThreshold[5])
+            elif k == ord('h'):
+                if self.keyThreshold[6] > 0:
+                    self.keyThreshold[6] -= 0.05
+                    print "Key Threshold 5: {0}".format(self.keyThreshold[6])
+            elif k == ord('j'):
+                if self.keyThreshold[6] < 10:
+                    self.keyThreshold[6] += 0.05
+                    print "Key Threshold 6: {0}".format(self.keyThreshold[6])
+            elif k == ord('k'):
+                if self.keyThreshold[7] > 0:
+                    self.keyThreshold[7] -= 0.05
+                    print "Key Threshold 7: {0}".format(self.keyThreshold[7])
+            elif k == ord('l'):
+                if self.keyThreshold[7] < 10:
+                    self.keyThreshold[7] += 0.05
+                    print "Key Threshold 6: {0}".format(self.keyThreshold[7])
 
 main = Main()
 main.initializeDepthLoop()

@@ -115,7 +115,7 @@ class DepthProcessor:
             depthDifference = self.depthValues.item(depthPointY, depthPointX) - depthFrame.item(depthPointY, depthPointX)
             print depthDifference
 
-            if depthDifference < keyThreshold * self.normalizedThresholdMatrix.item(depthPointY, depthPointX) * thresholdList[int(depthPointX / 128)]:
+            if depthDifference < keyThreshold * self.normalizedThresholdMatrix.item(depthPointY, depthPointX) * thresholdList[int(depthPointX / 64)]:
                 keysBeingPressed.append(key)
         return keysBeingPressed
 
