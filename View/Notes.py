@@ -22,6 +22,9 @@ class Notes:
         self.baseNotes = ["C1","Db1","D1","Eb1","E1","F1","Gb1","G1","Ab1","A1","Bb1","B1",
                           "C2","Db2","D2","Eb2","E2","F2","Gb2","G2","Ab2","A2","Bb2","B2",]
 
+        self.currInstrument = "Piano"
+
+
         self.pianoC3 = pygame.mixer.Sound("Piano/C3.wav")
         self.pianoDb3 = pygame.mixer.Sound("Piano/Db3.wav")
         self.pianoD3 = pygame.mixer.Sound("Piano/D3.wav")
@@ -105,12 +108,11 @@ class Notes:
                               self.pianoC5, self.pianoDb5, self.pianoD5, self.pianoEb5, self.pianoE5, self.pianoF5, self.pianoGb5, self.pianoG5, self.pianoAb5, self.pianoA5, self.pianoBb5, self.pianoB5,
                               self.pianoC6, self.pianoDb6, self.pianoD6, self.pianoEb6, self.pianoE6, self.pianoF6, self.pianoGb6, self.pianoG6, self.pianoAb6, self.pianoA6, self.pianoBb6, self.pianoB6,]
 
-        self.allXylophoneNotes = [self.xylophoneC5, self.xylophoneDb5, self.xylophoneD5, self.xylophoneEb5, self.xylophoneE5, self.xylophoneF5, self.xylophoneGb5, self.xylophoneG5, self.xylophoneAb5, self.xylophoneA5, self.xylophoneBb5,
-                                  self.xylophoneC6, self.xylophoneDb6, self.xylophoneD6, self.xylophoneEb6, self.xylophoneE6, self.xylophoneF6, self.xylophoneGb6, self.xylophoneG6, self.xylophoneAb6, self.xylophoneA6, self.xylophoneBb6, ]
+        self.allXylophoneNotes = [self.xylophoneC5, self.xylophoneDb5, self.xylophoneD5, self.xylophoneEb5, self.xylophoneE5, self.xylophoneF5, self.xylophoneGb5, self.xylophoneG5, self.xylophoneAb5, self.xylophoneA5, self.xylophoneBb5, self.xylophoneB5,
+                                  self.xylophoneC6, self.xylophoneDb6, self.xylophoneD6, self.xylophoneEb6, self.xylophoneE6, self.xylophoneF6, self.xylophoneGb6, self.xylophoneG6, self.xylophoneAb6, self.xylophoneA6, self.xylophoneBb6, self.xylophoneB6]
 
         self.allNotes = dict()
         self.noteQueue = NoteQueue.NoteQueue()
-        self.currInstrument = "Piano"
         self.currOctave = 5
         self.buildAllNotesFromInstrumentAndOctave(self.currInstrument, self.currOctave)
 
@@ -129,6 +131,7 @@ class Notes:
                     self.allNotes[baseNote] = instrumentNote
 
         elif instrument == "Xylophone":
+            print "yea we hur"
             if octave == 5:
                 self.allNotes = dict()
                 octaveIdx = 0

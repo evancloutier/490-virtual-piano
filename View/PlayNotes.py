@@ -20,12 +20,12 @@ class PlayNotes:
 
         elif alexaFeedback == "Piano":
             if self.musicalNotes.currInstrument != "Piano":
-                self.musicalNotes.buildAllNotesFromInstrumentAndOctave(self.musicalNotes.alexaFeedback, self.musicalNotes.currOctave)
+                self.musicalNotes.buildAllNotesFromInstrumentAndOctave(alexaFeedback, 5)
                 self.musicalNotes.currInstrument = "Piano"
 
         elif alexaFeedback == "Xylophone":
-            if self.musicalNotes.currInstrument != "Piano":
-                self.musicalNotes.buildAllNotesFromInstrumentAndOctave(self.musicalNotes.alexaFeedback, self.musicalNotes.currOctave)
+            if self.musicalNotes.currInstrument != "Xylophone":
+                self.musicalNotes.buildAllNotesFromInstrumentAndOctave(alexaFeedback, 5)
                 self.musicalNotes.currInstrument = "Xylophone"
 
 
