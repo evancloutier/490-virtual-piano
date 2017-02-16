@@ -15,11 +15,15 @@ class ReadNotes:
     def readAlexa(self):
         if os.path.exists(self.alexaFileLoc):
             self.alexaFile = open(self.alexaFileLoc)
-            raw = self.file.readlines()
+            raw = self.alexaFile.readlines()
             if len(raw) > 0:
                 raw = raw[0]
                 data = raw.strip()
+                self.alexaFile.close()
+                open(self.alexaFileLoc, 'w').close()
                 return data
+
+            self.alexaFile.close()
         return ""
 
 

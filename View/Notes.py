@@ -2,6 +2,7 @@ import pygame
 import cv2
 import numpy
 import NoteQueue
+import pdb
 
 class Notes:
     def __init__(self):
@@ -99,10 +100,10 @@ class Notes:
         self.xylophoneBb6 = pygame.mixer.Sound("Xylophone/Bb6.wav")
         self.xylophoneB6 = pygame.mixer.Sound("Xylophone/B6.wav")
 
-        self.allPianoNotes = [self.pianoC3, self.pianoDb3, self.pianoD3, self.pianoEb3, self.pianoE3, self.pianoF3, self.pianoGb3, self.pianoG3, self.pianoAb3, self.pianoA3, self.pianoBb3,
-                              self.pianoC4, self.pianoDb4, self.pianoD4, self.pianoEb4, self.pianoE4, self.pianoF4, self.pianoGb4, self.pianoG4, self.pianoAb4, self.pianoA4, self.pianoBb4,
-                              self.pianoC5, self.pianoDb5, self.pianoD5, self.pianoEb5, self.pianoE5, self.pianoF5, self.pianoGb5, self.pianoG5, self.pianoAb5, self.pianoA5, self.pianoBb5,
-                              self.pianoC6, self.pianoDb6, self.pianoD6, self.pianoEb6, self.pianoE6, self.pianoF6, self.pianoGb6, self.pianoG6, self.pianoAb6, self.pianoA6, self.pianoBb6, ]
+        self.allPianoNotes = [self.pianoC3, self.pianoDb3, self.pianoD3, self.pianoEb3, self.pianoE3, self.pianoF3, self.pianoGb3, self.pianoG3, self.pianoAb3, self.pianoA3, self.pianoBb3, self.pianoB3,
+                              self.pianoC4, self.pianoDb4, self.pianoD4, self.pianoEb4, self.pianoE4, self.pianoF4, self.pianoGb4, self.pianoG4, self.pianoAb4, self.pianoA4, self.pianoBb4, self.pianoB4,
+                              self.pianoC5, self.pianoDb5, self.pianoD5, self.pianoEb5, self.pianoE5, self.pianoF5, self.pianoGb5, self.pianoG5, self.pianoAb5, self.pianoA5, self.pianoBb5, self.pianoB5,
+                              self.pianoC6, self.pianoDb6, self.pianoD6, self.pianoEb6, self.pianoE6, self.pianoF6, self.pianoGb6, self.pianoG6, self.pianoAb6, self.pianoA6, self.pianoBb6, self.pianoB6,]
 
         self.allXylophoneNotes = [self.xylophoneC5, self.xylophoneDb5, self.xylophoneD5, self.xylophoneEb5, self.xylophoneE5, self.xylophoneF5, self.xylophoneGb5, self.xylophoneG5, self.xylophoneAb5, self.xylophoneA5, self.xylophoneBb5,
                                   self.xylophoneC6, self.xylophoneDb6, self.xylophoneD6, self.xylophoneEb6, self.xylophoneE6, self.xylophoneF6, self.xylophoneGb6, self.xylophoneG6, self.xylophoneAb6, self.xylophoneA6, self.xylophoneBb6, ]
@@ -123,6 +124,7 @@ class Notes:
             if octave >= 3 and octave <= 5:
                 self.allNotes = dict()
                 octaveIdx = octave - 3
+
                 for baseNote, instrumentNote in zip(self.baseNotes, self.allPianoNotes[octaveIdx * 12:]):
                     self.allNotes[baseNote] = instrumentNote
 
@@ -132,6 +134,7 @@ class Notes:
                 octaveIdx = 0
                 for baseNote, instrumentNote in zip(self.baseNotes, self.allXylophoneNotes[octaveIdx * 12:]):
                     self.allNotes[baseNote] = instrumentNote
+
 
 
     def removeFromQueue(self, note):

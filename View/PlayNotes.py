@@ -12,14 +12,21 @@ class PlayNotes:
     def updateInstrument(self, alexaFeedback):
         if alexaFeedback == "Up":
             self.musicalNotes.buildAllNotesFromInstrumentAndOctave(self.musicalNotes.currInstrument, self.musicalNotes.currOctave + 1)
+            self.musicalNotes.currOctave += 1
+
         elif alexaFeedback == "Down":
             self.musicalNotes.buildAllNotesFromInstrumentAndOctave(self.musicalNotes.currInstrument, self.musicalNotes.currOctave - 1)
+            self.musicalNotes.currOctave -= 1
+
         elif alexaFeedback == "Piano":
             if self.musicalNotes.currInstrument != "Piano":
                 self.musicalNotes.buildAllNotesFromInstrumentAndOctave(self.musicalNotes.alexaFeedback, self.musicalNotes.currOctave)
+                self.musicalNotes.currInstrument = "Piano"
+
         elif alexaFeedback == "Xylophone":
             if self.musicalNotes.currInstrument != "Piano":
                 self.musicalNotes.buildAllNotesFromInstrumentAndOctave(self.musicalNotes.alexaFeedback, self.musicalNotes.currOctave)
+                self.musicalNotes.currInstrument = "Xylophone"
 
 
     def playNotes(self):
