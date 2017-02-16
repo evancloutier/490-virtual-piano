@@ -25,7 +25,7 @@ except:
     from pylibfreenect2 import CpuPacketPipeline
     pipeline = CpuPacketPipeline()
 
-# Memory locations
+# Memory locationsr
 sharedMemKeyLoc = "Kinect/memkey.txt"
 # sharedMemKeyLoc = "memkey.txt"
 semaphoreKeyLoc = "Kinect/semkey.txt"

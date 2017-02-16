@@ -24,14 +24,14 @@ class BoundsDetector:
             self.kinect.releaseFrame()
             k = cv2.waitKey(10)
 
-            if k == 27:
+            if k == 27 or k == 1048603:
                 cv2.destroyAllWindows()
                 break
-            elif k == ord('q'):
+            elif k == ord('q') or k == 1048689:
                 if self.lowerThresh > 0:
                     self.lowerThresh -= 1
                     print "lowerThresh", self.lowerThresh
-            elif k == ord('w'):
+            elif k == ord('w') or k == 1048695:
                 if self.lowerThresh < 255:
                     self.lowerThresh += 1
                     print "lowerThresh", self.lowerThresh
@@ -85,7 +85,7 @@ class BoundsDetector:
 
     def getROIBounds(self):
         x, y, w, h = cv2.boundingRect(self.largestContour)
-        return self.getROIPoints(x, y, x + w, y + h, 0.3)
+        return self.getROIPoints(x, y, x + w, y + h, 0.2)
 
     def getBoundingBoxOfHand(self, hand):
         if hand is None or type(hand) != np.ndarray:

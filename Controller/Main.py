@@ -15,6 +15,7 @@ class Main:
         blurSize = 7
         threshVal = 159
 
+        self.keyThreshold = [1] * 8
         self.writeNotes = WriteNotes.WriteNotes()
         self.fingerMapper = FingerMapper.FingerMapper()
         self.fingerDetector = FingerDetector.FingerDetector(blurSize, threshVal, False, self.kinect)
@@ -39,7 +40,7 @@ class Main:
 
             k = cv2.waitKey(10)
 
-            if k == 27:
+            if k == 27 or k == 1048603:
                 cv2.destroyAllWindows()
                 self.kinect.exit()
                 break
@@ -49,6 +50,11 @@ class Main:
         self.depthProcessor.depthValues = self.depthProcessor.sumDepthValues / tens
         print np.amax(self.depthProcessor.sumDepthValues)
         print np.amax(self.depthProcessor.depthValues)
+        frame = self.kinect.getFrame()
+        frames = self.kinect.frames
+        self.depthProcessor.buildNormalizedThresholdMatrix(frames["depth"])
+        self.kinect.releaseFrame()
+
         end = time.time()
         print "Done initializing, took ", end - start, "seconds"
 
@@ -62,65 +68,162 @@ class Main:
 
 
             filteredIm, backProject = self.fingerDetector.applyHistogram(color)
-            self.kinect.colorHandBounds = self.boundsDetector.getBoundingBoxOfHand(self.fingerDetector.hand)
+            totalKeysBeingPressed = []
 
-            x1, y1, x2, y2 = self.kinect.colorHandBounds
+            hand = self.fingerDetector.hand1
+            for i in range(2):
+                self.kinect.colorHandBounds = self.boundsDetector.getBoundingBoxOfHand(hand)
+                x1, y1, x2, y2 = self.kinect.colorHandBounds
 
-            cv2.rectangle(color, (x1, y1), (x2, y2), (0, 0, 0), 2)
+                filteredHandIm = self.kinect.getHandColorFrame(filteredIm)
+                fingerIm, fingerPoints = self.fingerDetector.getFingerPositions(filteredHandIm, x1, y1, hand)
 
+                keysBeingHovered = self.fingerMapper.getKeysBeingHovered(fingerPoints, self.keyDetector.keys)
 
-            filteredHandIm = self.kinect.getHandColorFrame(filteredIm)
-            #if len(filteredHandIm) > 0 and len(filteredHandIm[0]) > 0:
-            #    cv2.imshow("filtered hand im", filteredHandIm)
-
-            fingerIm, fingerPoints = self.fingerDetector.getFingerPositions(filteredHandIm, x1, y1)
-
-            keysBeingHovered = self.fingerMapper.getKeysBeingHovered(fingerPoints, self.keyDetector.keys)
-
-            #print "keys being hovered:", keysBeingHovered
-
-            #check to see if the finger points are being pressed
-            keysBeingPressed = self.depthProcessor.checkFingerPoints(depth, keysBeingHovered)
-
-            #print "keys being pressed without matrix:", keysBeingPressed
+                keysBeingPressed = self.depthProcessor.checkFingerPoints(depth, keysBeingHovered, self.keyThreshold)
+                keysBeingPressed = self.depthProcessor.calculateNotesMatrix(keysBeingPressed, i)
 
 
-            keysBeingPressed = self.depthProcessor.calculateNotesMatrix(keysBeingPressed)
+                totalKeysBeingPressed.extend(keysBeingPressed)
 
-            print "keys being pressed with matrix:", keysBeingPressed
+                if len(filteredHandIm) > 0 and len(filteredHandIm[0]) > 0:
+                    if i == 0:
+                        h1 = np.copy(filteredHandIm)
+                        f1 = np.copy(fingerIm)
+                        #cv2.imshow("Filtered Hand Image", h1)
+                        if f1 is not None:
+                            if len(f1) > 0 and len(f1[0]) > 0:
+                                p = 1
+                                cv2.imshow("finger im", f1)
+                    elif i == 1:
+                        h2 = np.copy(filteredHandIm)
+                        f2 = np.copy(fingerIm)
+                        #cv2.imshow("Other hand im", h2)
+                        if f2 is not None:
+                            if len(f2) > 0 and len(f2[0]) > 0:
+                                p = 1
+                                cv2.imshow("second finger im", f2)
+                hand = self.fingerDetector.hand2
 
-            self.writeNotes.writeKeyNamesToFile(keysBeingPressed)
+            # Move this garbage into a function
+            cv2.putText(depth, str(self.keyThreshold[0]), (30, 212), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
+            cv2.putText(depth, str(self.keyThreshold[1]), (96, 212), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
+            cv2.putText(depth, str(self.keyThreshold[2]), (160, 212), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
+            cv2.putText(depth, str(self.keyThreshold[3]), (226, 212), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
+            cv2.putText(depth, str(self.keyThreshold[4]), (292, 212), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
+            cv2.putText(depth, str(self.keyThreshold[5]), (358, 212), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
+            cv2.putText(depth, str(self.keyThreshold[6]), (424, 212), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
+            cv2.putText(depth, str(self.keyThreshold[7]), (490, 212), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
+
+            cv2.rectangle(depth, (0, 0), (64, 424), (0, 255, 0), 3)
+            cv2.rectangle(depth, (64, 0), ((64 * 2), 424), (0, 255, 0), 3)
+            cv2.rectangle(depth, ((64 * 2), 0), ((64 * 3), 424), (0, 255, 0), 3)
+            cv2.rectangle(depth, ((64 * 3), 0), ((64 * 4), 424), (0, 255, 0), 3)
+            cv2.rectangle(depth, ((64 * 4), 0), ((64 * 5), 424), (0, 255, 0), 3)
+            cv2.rectangle(depth, ((64 * 5), 0), ((64 * 6), 424), (0, 255, 0), 3)
+            cv2.rectangle(depth, ((64 * 6), 0), ((64 * 7), 424), (0, 255, 0), 3)
+            cv2.rectangle(depth, ((64 * 7), 0), ((64 * 8), 424), (0, 255, 0), 3)
+
+            cv2.imshow("Depth", depth / 4500.)
+            cv2.imshow("Filtered Image", filteredIm)
 
 
-            if fingerIm is not None:
-                if len(fingerIm) > 0 and len(fingerIm[0]) > 0:
-                    cv2.imshow("finger im", fingerIm)
+            print "Keys being pressed without matrix: {0}".format(totalKeysBeingPressed)
+            print "Keys being pressed with matrix: {0}".format(totalKeysBeingPressed)
 
-            if fingerPoints is not None:
-                for point in fingerPoints:
-                    cv2.circle(color, (point[0], point[1]), 4, color=(255,255,0), thickness=3)
+            self.writeNotes.writeKeyNamesToFile(totalKeysBeingPressed)
+
+
+            # if fingerIm is not None:
+            #     if len(fingerIm) > 0 and len(fingerIm[0]) > 0:
+            #         cv2.imshow("finger im", fingerIm)
+
+            # if fingerPoints is not None:
+            #     for point in fingerPoints:
+            #         cv2.circle(color, (point[0], point[1]), 4, color=(255,255,0), thickness=3)
 
 
             #cv2.imshow("color", color)
+            #cv2.imshow("normalized", self.depthProcessor.normalizedThresholdMatrix)
             #cv2.imshow("depth", depth / 4500.)
-            #cv2.imshow("Average depth value", self.depthProcessor.depthValues)
+            ##cv2.imshow("Average depth value", self.depthProcessor.depthValues)
 
-            #handDepthFrame = self.kinect.getHandDepthFrame(color, depth)
-            #handDepthColorMap = self.depthProcessor.processDepthFrame(handDepthFrame)
+            ##handDepthFrame = self.kinect.getHandDepthFrame(color, depth)
+            ##handDepthColorMap = self.depthProcessor.processDepthFrame(handDepthFrame)
 
 
             self.kinect.releaseFrame()
 
             k = cv2.waitKey(10)
 
-            if k == 27:
+            if k == 27 or k == 1048603:
                 cv2.destroyAllWindows()
                 self.kinect.exit()
                 break
-            #else:
-            #    self.fingerDetector.adjustParams(k)
-
-
+            elif k == ord('q') or k == 1048689:
+                if self.keyThreshold[0] > 0:
+                    self.keyThreshold[0] -= 0.05
+                    print "Key Threshold 0: {0}".format(self.keyThreshold[0])
+            elif k == ord('w') or k == 1048695:
+                if self.keyThreshold[0] < 10:
+                    self.keyThreshold[0] += 0.05
+                    print "Key Threshold 0: {0}".format(self.keyThreshold[0])
+            elif k == ord('e') or k == 1048677:
+                if self.keyThreshold[1] > 0:
+                    self.keyThreshold[1] -= 0.05
+                    print "Key Threshold 1: {0}".format(self.keyThreshold[1])
+            elif k == ord('r') or k == 1048690:
+                if self.keyThreshold[1] < 10:
+                    self.keyThreshold[1] += 0.05
+                    print "Key Threshold 1: {0}".format(self.keyThreshold[1])
+            elif k == ord('a') or k == 1048673:
+                if self.keyThreshold[2] > 0:
+                    self.keyThreshold[2] -= 0.05
+                    print "Key Threshold 2: {0}".format(self.keyThreshold[2])
+            elif k == ord('s') or k == 1048691:
+                if self.keyThreshold[2] < 10:
+                    self.keyThreshold[2] += 0.05
+                    print "Key Threshold 2: {0}".format(self.keyThreshold[2])
+            elif k == ord('d') or k == 1048676:
+                if self.keyThreshold[3] > 0:
+                    self.keyThreshold[3] -= 0.05
+                    print "Key Threshold 3: {0}".format(self.keyThreshold[3])
+            elif k == ord('f') or k == 1048678:
+                if self.keyThreshold[3] < 10:
+                    self.keyThreshold[3] += 0.05
+                    print "Key Threshold 3: {0}".format(self.keyThreshold[3])
+            elif k == ord('y') or k == 1048697:
+                if self.keyThreshold[4] > 0:
+                    self.keyThreshold[4] -= 0.05
+                    print "Key Threshold 4: {0}".format(self.keyThreshold[4])
+            elif k == ord('u') or k == 1048693:
+                if self.keyThreshold[4] < 10:
+                    self.keyThreshold[4] += 0.05
+                    print "Key Threshold 4: {0}".format(self.keyThreshold[4])
+            elif k == ord('i') or k == 1048681:
+                if self.keyThreshold[5] > 0:
+                    self.keyThreshold[5] -= 0.05
+                    print "Key Threshold 5: {0}".format(self.keyThreshold[5])
+            elif k == ord('o') or k == 1048687:
+                if self.keyThreshold[5] < 10:
+                    self.keyThreshold[5] += 0.05
+                    print "Key Threshold 5: {0}".format(self.keyThreshold[5])
+            elif k == ord('h') or k == 1048680:
+                if self.keyThreshold[6] > 0:
+                    self.keyThreshold[6] -= 0.05
+                    print "Key Threshold 5: {0}".format(self.keyThreshold[6])
+            elif k == ord('j') or k == 1048682:
+                if self.keyThreshold[6] < 10:
+                    self.keyThreshold[6] += 0.05
+                    print "Key Threshold 6: {0}".format(self.keyThreshold[6])
+            elif k == ord('k') or k == 1048683:
+                if self.keyThreshold[7] > 0:
+                    self.keyThreshold[7] -= 0.05
+                    print "Key Threshold 7: {0}".format(self.keyThreshold[7])
+            elif k == ord('l') or k == 1048684:
+                if self.keyThreshold[7] < 10:
+                    self.keyThreshold[7] += 0.05
+                    print "Key Threshold 6: {0}".format(self.keyThreshold[7])
 
 main = Main()
 main.initializeDepthLoop()
