@@ -27,11 +27,11 @@ class BoundsDetector:
             if k == 27 or k == 1048603:
                 cv2.destroyAllWindows()
                 break
-            elif k == ord('q'):
+            elif k == ord('q') or k == 1048689:
                 if self.lowerThresh > 0:
                     self.lowerThresh -= 1
                     print "lowerThresh", self.lowerThresh
-            elif k == ord('w'):
+            elif k == ord('w') or k == 1048695:
                 if self.lowerThresh < 255:
                     self.lowerThresh += 1
                     print "lowerThresh", self.lowerThresh

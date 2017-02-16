@@ -22,8 +22,8 @@ class FingerDetector:
         self.bothHands = bothHands
         self.threshVal = threshVal
         self.hist = None
-        self.hand = None
-        self.handWidth = 1
+        self.hand1 = None
+        self.hand2 = None
         self.fingerPoints = None
 
     def adjustParams(self, k):
@@ -142,9 +142,9 @@ class FingerDetector:
         #cv2.imshow("Back Projection", backProject)
 
         filteredIm = self.blurFrame(filteredIm, self.blurPixelSize)
-        hand = self.getLargestShapes(filteredIm)[0]
-        filteredIm = self.drawShape(blackImgCopy, hand)
-        self.hand = hand
+        self.hand1, self.hand2 = self.getLargestShapes(filteredIm, True)
+        self.drawShape(blackImgCopy, self.hand1)
+        self.drawShape(blackImgCopy, self.hand2)
 
         return (blackImgCopy, backProject)
 
@@ -249,26 +249,32 @@ class FingerDetector:
             fingerPoints[idx][1] += yoffset
         return fingerPoints
 
-    def getFingerPositions(self, image, xoffset, yoffset):
+    def getFingerPositions(self, image, xoffset, yoffset, hand):
         if image == None:
             return (None, None)
         if len(image) == 0 or len(image[0]) == 0:
             return (None, None)
 
         grayIm = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
-        binaryIm = self.convertToBinary(grayIm)
-        grayIm = self.skeletonizeHand(grayIm)
-        self.hand = self.getLargestShapes(grayIm)[0]
+        handIm = np.copy(grayIm)
+        skeletonIm = self.skeletonizeHand(grayIm)
 
         #x,y,maxVal = self.findLargestInscribedRectangle(binaryIm)
 
-        centerOfHand = self.getCenterOfHand(self.hand)
-        self.removeCenterOfHand(binaryIm, grayIm, centerOfHand)
+        centerOfHand = self.getCenterOfHand(hand)
+        if centerOfHand is not None:
+            centerOfHand = (centerOfHand[0] - xoffset, centerOfHand[1] - yoffset)
+
+        self.removeCenterOfHand(handIm, skeletonIm, centerOfHand, hand)
+
+
         #cv2.rectangle(grayIm, (x,y), (x - maxVal, y - maxVal), color=0, thickness=-1)
         #cv2.rectangle(binaryIm, (x,y), (x - maxVal, y - maxVal), color=0, thickness=-1)
-        blackImgCopy = self.getBackgroundCopy(len(binaryIm), len(binaryIm[0]))
+        blackImgCopy = self.getBackgroundCopy(len(skeletonIm), len(skeletonIm[0]))
 
-        otsuRet, otsuThresh = cv2.threshold(grayIm, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+
+
+        otsuRet, otsuThresh = cv2.threshold(skeletonIm, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
         cnts = cv2.findContours(otsuThresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         cnts = cnts[0] if imutils.is_cv2() else cnts[1]
 
@@ -279,16 +285,16 @@ class FingerDetector:
 
     #http://opencvpython.blogspot.ca/2012/05/skeletonization-using-opencv-python.html
     #getFingerPositions
-    def skeletonizeHand(self, binaryIm):
-        binaryIm[binaryIm == 255] = 1
-        skeleton = skeletonize(binaryIm)
+    def skeletonizeHand(self, grayIm):
+        grayIm[grayIm == 255] = 1
+        skeleton = skeletonize(grayIm)
 
-        binaryIm[skeleton == 1] = 255
+        grayIm[skeleton == 1] = 255
 
         kernel = np.ones((5, 5))
-        binaryIm = cv2.dilate(binaryIm, kernel, iterations=1)
+        grayIm = cv2.dilate(grayIm, kernel, iterations=1)
 
-        return binaryIm
+        return grayIm
 
     '''frame/ machine learning functions'''
 
@@ -327,24 +333,16 @@ class FingerDetector:
     '''shape functions'''
     def getLargestShapes(self, frame, bothHands=False):
         _, contours, contourHeirarchy = cv2.findContours(frame.copy(), cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE)
-        maxContourSize = 0
-        largestContour = []
-        secondLargestContour = []
 
-        for contour in contours:
-            if len(contour) > maxContourSize:
-                maxContourSize = len(contour)
-                secondLargestContour = largestContour
-                largestContour = contour
+        largestContour = None
+        secondLargestContour = None
+        contourAreas = [cv2.contourArea(c) for c in contours]
+        sortedAreas = sorted(zip(contourAreas, contours), key = lambda x: x[0], reverse = True)
+        if len(contours) > 0:
+            largestContour = sortedAreas[0][1]
+            if len(contours) > 1:
+                secondLargestContour = sortedAreas[1][1]
 
-        if type(largestContour) == np.ndarray:
-            M = cv2.moments(largestContour)
-
-            area = M['m00']
-            areaThresh = 100
-            if area < areaThresh:
-                largestContour = None
-                secondLargestContour = None
         if bothHands:
             return (largestContour, secondLargestContour)
         return (largestContour, None)
@@ -494,22 +492,21 @@ class FingerDetector:
         box = (int(center[0]), int(center[1]), int(width), int(width/2), 0)
         cv2.ellipse(frame, (center[0],center[1]), (width, width/2), 0, 0, 180, (0,0,0), 2)
 
-    def removeCenterOfHand(self, frame, frameToDraw, centerOfHand):
+    def removeCenterOfHand(self, frame, frameToDraw, centerOfHand, hand):
         if centerOfHand is not None:
                 handWidth = 0
                 centerX = centerOfHand[0]
                 centerY = centerOfHand[1]
                 if centerY < len(frame) and centerX < len(frame[0]):
                     for i in range(centerX, len(frame[0])):
-                        if frame[centerY][i] == 1:
+                        if frame[centerY][i] == 255:
                             handWidth += 1
                     for i in range(centerX, 0, -1):
-                        if frame[centerY][i] == 1:
+                        if frame[centerY][i] == 255:
                             if abs(centerX - i) > handWidth:
                                 handWidth += 1
                     handWidth += 1
-                    self.handWidth = handWidth
-                    self.drawCenterOfHand(frameToDraw, centerOfHand, color=0, width=int(handWidth), thickness=-1)
+                    self.drawCenterOfHand(frameToDraw, centerOfHand, color=0, width=int(0.8 * handWidth), thickness=-1)
 
     def drawFingerPoints(self, frame, fingerPoints):
         if fingerPoints is not None:

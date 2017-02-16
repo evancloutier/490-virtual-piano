@@ -15,6 +15,7 @@ class Main:
         blurSize = 7
         threshVal = 159
 
+        self.keyThreshold = 10
         self.writeNotes = WriteNotes.WriteNotes()
         self.fingerMapper = FingerMapper.FingerMapper()
         self.fingerDetector = FingerDetector.FingerDetector(blurSize, threshVal, False, self.kinect)
@@ -67,43 +68,57 @@ class Main:
 
 
             filteredIm, backProject = self.fingerDetector.applyHistogram(color)
-            self.kinect.colorHandBounds = self.boundsDetector.getBoundingBoxOfHand(self.fingerDetector.hand)
+            totalKeysBeingPressed = []
 
-            x1, y1, x2, y2 = self.kinect.colorHandBounds
+            hand = self.fingerDetector.hand1
+            for i in range(2):
+                self.kinect.colorHandBounds = self.boundsDetector.getBoundingBoxOfHand(hand)
+                x1, y1, x2, y2 = self.kinect.colorHandBounds
 
-            cv2.rectangle(color, (x1, y1), (x2, y2), (0, 0, 0), 2)
+                filteredHandIm = self.kinect.getHandColorFrame(filteredIm)
+                fingerIm, fingerPoints = self.fingerDetector.getFingerPositions(filteredHandIm, x1, y1, hand)
 
+                keysBeingHovered = self.fingerMapper.getKeysBeingHovered(fingerPoints, self.keyDetector.keys)
 
-            filteredHandIm = self.kinect.getHandColorFrame(filteredIm)
-            #if len(filteredHandIm) > 0 and len(filteredHandIm[0]) > 0:
-            #    cv2.imshow("filtered hand im", filteredHandIm)
-
-            fingerIm, fingerPoints = self.fingerDetector.getFingerPositions(filteredHandIm, x1, y1)
-
-            keysBeingHovered = self.fingerMapper.getKeysBeingHovered(fingerPoints, self.keyDetector.keys)
-
-            print "keys being hovered:", keysBeingHovered
-
-            #check to see if the finger points are being pressed
-            keysBeingPressed = self.depthProcessor.checkFingerPoints(depth, keysBeingHovered)
-
-            #print "keys being pressed without matrix:", keysBeingPressed
+                keysBeingPressed = self.depthProcessor.checkFingerPoints(depth, keysBeingHovered, self.keyThreshold)
+                keysBeingPressed = self.depthProcessor.calculateNotesMatrix(keysBeingPressed, i)
 
 
-            keysBeingPressed = self.depthProcessor.calculateNotesMatrix(keysBeingPressed)
+                totalKeysBeingPressed.extend(keysBeingPressed)
 
-            print "keys being pressed with matrix:", keysBeingPressed
+                if len(filteredHandIm) > 0 and len(filteredHandIm[0]) > 0:
+                    if i == 0:
+                        h1 = np.copy(filteredHandIm)
+                        f1 = np.copy(fingerIm)
+                        #cv2.imshow("Filtered Hand Image", h1)
+                        if f1 is not None:
+                            if len(f1) > 0 and len(f1[0]) > 0:
+                                p = 1
+                                cv2.imshow("finger im", f1)
+                    elif i == 1:
+                        h2 = np.copy(filteredHandIm)
+                        f2 = np.copy(fingerIm)
+                        #cv2.imshow("Other hand im", h2)
+                        if f2 is not None:
+                            if len(f2) > 0 and len(f2[0]) > 0:
+                                p = 1
+                                cv2.imshow("second finger im", f2)
+                hand = self.fingerDetector.hand2
 
-            self.writeNotes.writeKeyNamesToFile(keysBeingPressed)
+            cv2.imshow("filtered Image", filteredIm)
+            print "Keys being pressed without matrix: {0}".format(totalKeysBeingPressed)
+            print "Keys being pressed with matrix: {0}".format(totalKeysBeingPressed)
+
+            self.writeNotes.writeKeyNamesToFile(totalKeysBeingPressed)
 
 
-            if fingerIm is not None:
-                if len(fingerIm) > 0 and len(fingerIm[0]) > 0:
-                    cv2.imshow("finger im", fingerIm)
+            # if fingerIm is not None:
+            #     if len(fingerIm) > 0 and len(fingerIm[0]) > 0:
+            #         cv2.imshow("finger im", fingerIm)
 
-            if fingerPoints is not None:
-                for point in fingerPoints:
-                    cv2.circle(color, (point[0], point[1]), 4, color=(255,255,0), thickness=3)
+            # if fingerPoints is not None:
+            #     for point in fingerPoints:
+            #         cv2.circle(color, (point[0], point[1]), 4, color=(255,255,0), thickness=3)
 
 
             #cv2.imshow("color", color)
@@ -123,6 +138,15 @@ class Main:
                 cv2.destroyAllWindows()
                 self.kinect.exit()
                 break
+            elif k == ord('q') or k == 1048689:
+                if self.keyThreshold > 5:
+                    self.keyThreshold -= 0.2
+                    print "Key Threshold: {0}".format(self.keyThreshold)
+            elif k == ord('w') or k == 1048695:
+                if self.keyThreshold < 20:
+                    self.keyThreshold += 0.2
+                    print "Key Threshold: {0}".format(self.keyThreshold)
+
             #else:
             #    self.fingerDetector.adjustParams(k)
 
