@@ -9,13 +9,27 @@ class PlayNotes:
         self.musicalNotes = Notes.Notes()
         self.prevNotes = set()
 
+    def updateInstrument(self, alexaFeedback):
+        if alexaFeedback == "Up":
+            self.musicalNotes.buildAllNotesFromInstrumentAndOctave(self.musicalNotes.currInstrument, self.musicalNotes.currOctave + 1)
+        elif alexaFeedback == "Down":
+            self.musicalNotes.buildAllNotesFromInstrumentAndOctave(self.musicalNotes.currInstrument, self.musicalNotes.currOctave - 1)
+        elif alexaFeedback == "Piano":
+            if self.musicalNotes.currInstrument != "Piano":
+                self.musicalNotes.buildAllNotesFromInstrumentAndOctave(self.musicalNotes.alexaFeedback, self.musicalNotes.currOctave)
+        elif alexaFeedback == "Xylophone":
+            if self.musicalNotes.currInstrument != "Piano":
+                self.musicalNotes.buildAllNotesFromInstrumentAndOctave(self.musicalNotes.alexaFeedback, self.musicalNotes.currOctave)
+
+
     def playNotes(self):
         while True:
             notesToPlay = []
             notesToRelease = []
             newNotes, releasedNotes = self.readNotes.readNotes()
-            #print "new:", newNotes
-            #print "released:", releasedNotes
+            alexaFeedback = self.readNotes.readAlexa()
+            self.updateInstrument(alexaFeedback)
+
             for newNote in newNotes:
                 if newNote != "" and len(newNote) != 0:
                     notesToPlay.append(self.musicalNotes.allNotes[newNote])

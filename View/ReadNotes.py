@@ -4,11 +4,24 @@ import pdb
 class ReadNotes:
     def __init__(self):
         self.fileLocation = "../Model/Keys.txt"
+        self.alexaFileLoc = "490file.txt"
         self.file = None
+        self.alexaFile = None
         self.notes = []
         self.newNotes = []
         self.releasedNotes = []
         self.oldNotes = set()
+
+    def readAlexa(self):
+        if os.path.exists(self.alexaFileLoc):
+            self.alexaFile = open(self.alexaFileLoc)
+            raw = self.file.readlines()
+            if len(raw) > 0:
+                raw = raw[0]
+                data = raw.strip()
+                return data
+        return ""
+
 
     def readNotes(self):
         self.notes = []
