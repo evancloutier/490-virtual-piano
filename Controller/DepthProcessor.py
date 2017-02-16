@@ -101,6 +101,7 @@ class DepthProcessor:
         keysBeingPressed = []
         height, width = depthFrame.shape
         quadrantWidth = height / 4
+        keyThreshold = 10
 
         for key in keysBeingHovered:
             colorPoint = keysBeingHovered[key]

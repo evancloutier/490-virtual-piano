@@ -105,7 +105,19 @@ class Main:
                                 cv2.imshow("second finger im", f2)
                 hand = self.fingerDetector.hand2
 
-            cv2.imshow("filtered Image", filteredIm)
+            cv2.rectangle(depth, (0, 0), (128, 424), (0, 255, 0), 3)
+            cv2.putText(depth, str(self.keyThreshold[0]), (64, 212), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
+            cv2.rectangle(depth, (128, 0), ((128 * 2), 424), (0, 255, 0), 3)
+            cv2.putText(depth, str( self.keyThreshold[1]), ((64 * 2), 212), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
+            cv2.rectangle(depth, ((128 * 2), 0), ((128 * 3), 424), (0, 255, 0), 3)
+            cv2.putText(depth, str(self.keyThreshold[2]), ((64 * 3), 212), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
+            cv2.rectangle(depth, ((128 * 3), 0), ((128 * 4), 424), (0, 255, 0), 3)
+            cv2.putText(depth, str(self.keyThreshold[3]), ((64 * 4), 212), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
+
+            cv2.imshow("Depth", depth / 4500.)
+            cv2.imshow("Filtered Image", filteredIm)
+
+
             print "Keys being pressed without matrix: {0}".format(totalKeysBeingPressed)
             print "Keys being pressed with matrix: {0}".format(totalKeysBeingPressed)
 
